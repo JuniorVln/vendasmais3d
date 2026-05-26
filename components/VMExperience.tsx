@@ -508,7 +508,13 @@ function PhasePain({ scrollYProgress }: { scrollYProgress: MotionValue<number> }
 
 // ─── PHASE 3: SOLUTION ────────────────────────────────────────────
 // Cena 03: dashboard left + AURA phone right (3D renders). Text left only.
-function PhaseSolution() {
+function PhaseSolution({ scrollYProgress }: { scrollYProgress: MotionValue<number> }) {
+  // Scroll-driven exit: starts fading at 0.44, fully gone by 0.52
+  const exitP = useTransform(scrollYProgress, [0.44, 0.52], [0, 1]);
+
+  const textExitY  = useTransform(exitP, [0, 1],    [0, -44]);
+  const textExitOp = useTransform(exitP, [0, 0.72], [1, 0]);
+
   return (
     <motion.div
       key="phase-3"
@@ -517,7 +523,7 @@ function PhaseSolution() {
       className="absolute inset-0"
     >
       {/* Text — left side. Video shows dashboard+AURA on right. */}
-      <div className="absolute flex flex-col gap-4" style={{ top: "7.5%", left: "6.5%", maxWidth: "44%" }}>
+      <motion.div className="absolute flex flex-col gap-4" style={{ top: "7.5%", left: "6.5%", maxWidth: "44%", y: textExitY, opacity: textExitOp }}>
         <h2
           className="font-black"
           style={{
@@ -541,7 +547,7 @@ function PhaseSolution() {
           Uma plataforma completa que une alta tecnologia com um processo
           comercial eficiente para transformar o dia a dia das suas vendas.
         </p>
-      </div>
+      </motion.div>
 
     </motion.div>
   );
@@ -907,7 +913,7 @@ export default function VMExperience({ scrollYProgress }: VMExperienceProps) {
       <AnimatePresence mode="wait">
         {activePhase === 1 && <PhaseHero scrollYProgress={scrollYProgress} />}
         {activePhase === 2 && <PhasePain scrollYProgress={scrollYProgress} />}
-        {activePhase === 3 && <PhaseSolution />}
+        {activePhase === 3 && <PhaseSolution scrollYProgress={scrollYProgress} />}
         {activePhase === 4 && <PhaseAuthority scrollYProgress={scrollYProgress} />}
         {activePhase === 5 && <PhaseCTA />}
       </AnimatePresence>
