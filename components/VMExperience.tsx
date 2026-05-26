@@ -409,8 +409,17 @@ const painPoints: Array<{
   { Icon: UsersRound, title: "EQUIPE SOBRECARREGADA", body: "Vendedores gastam tempo organizando em vez de vender.", bold: "Libere-os." },
 ];
 
-function PhasePain() {
+function PhasePain({ scrollYProgress }: { scrollYProgress: MotionValue<number> }) {
   const e = tx.ease;
+
+  // Scroll-driven exit: starts fading at 0.20, fully gone by 0.28
+  const exitP = useTransform(scrollYProgress, [0.20, 0.28], [0, 1]);
+
+  const headlineExitY  = useTransform(exitP, [0, 1],    [0, -44]);
+  const headlineExitOp = useTransform(exitP, [0, 0.72], [1, 0]);
+  const cardsExitY     = useTransform(exitP, [0.05, 1], [0, -28]);
+  const cardsExitOp    = useTransform(exitP, [0.05, 0.88], [1, 0]);
+  const ctaExitOp      = useTransform(exitP, [0, 0.55], [1, 0]);
 
   return (
     <motion.div
@@ -421,30 +430,33 @@ function PhasePain() {
       transition={{ duration: 0.2 }}
       className="absolute inset-0"
     >
-      {/* Headline — slides in from right */}
+      {/* Headline — scroll-driven exit wrapper + entrance animation */}
       <motion.div
         className="absolute"
-        style={{ top: "6.3%", right: "4%", maxWidth: "59%", textAlign: "right" }}
-        initial={{ opacity: 0, x: 48 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.65, delay: 0.05, ease: e }}
+        style={{ top: "6.3%", right: "4%", maxWidth: "59%", textAlign: "right", y: headlineExitY, opacity: headlineExitOp }}
       >
-        <h2
-          className="font-black"
-          style={{ color: "#ffffff", fontSize: "clamp(34px, 3.45vw, 62px)", lineHeight: 1.08, letterSpacing: "-0.02em", ...ts }}
+        <motion.div
+          initial={{ opacity: 0, x: 48 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.65, delay: 0.05, ease: e }}
         >
-          Quantos <span style={{ color: "#C8941A" }}>leads</span> sua empresa
-          <br />
-          deixa de <span style={{ color: "#C8941A" }}>aproveitar</span> todos os
-          <br />
-          dias?
-        </h2>
+          <h2
+            className="font-black"
+            style={{ color: "#ffffff", fontSize: "clamp(34px, 3.45vw, 62px)", lineHeight: 1.08, letterSpacing: "-0.02em", ...ts }}
+          >
+            Quantos <span style={{ color: "#C8941A" }}>leads</span> sua empresa
+            <br />
+            deixa de <span style={{ color: "#C8941A" }}>aproveitar</span> todos os
+            <br />
+            dias?
+          </h2>
+        </motion.div>
       </motion.div>
 
-      {/* Pain cards — stagger up from below */}
-      <div
+      {/* Pain cards — scroll-driven exit wrapper + stagger entrance */}
+      <motion.div
         className="absolute grid grid-cols-5 gap-3"
-        style={{ top: "39.2%", left: "43.8%", right: "3.2%" }}
+        style={{ top: "39.2%", left: "43.8%", right: "3.2%", y: cardsExitY, opacity: cardsExitOp }}
       >
         {painPoints.map((p, index) => (
           <motion.div
@@ -474,16 +486,21 @@ function PhasePain() {
             </p>
           </motion.div>
         ))}
-      </div>
+      </motion.div>
 
-      {/* CTA — fades in */}
+      {/* CTA — scroll-driven exit */}
       <motion.div
         className="absolute inset-0 pointer-events-none"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5, delay: 0.22, ease: e }}
+        style={{ opacity: ctaExitOp }}
       >
-        <BottomCTA label="QUERO MAIS RESULTADOS" placement="painCardsRight" />
+        <motion.div
+          className="absolute inset-0 pointer-events-none"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.22, ease: e }}
+        >
+          <BottomCTA label="QUERO MAIS RESULTADOS" placement="painCardsRight" />
+        </motion.div>
       </motion.div>
     </motion.div>
   );
@@ -889,7 +906,7 @@ export default function VMExperience({ scrollYProgress }: VMExperienceProps) {
     >
       <AnimatePresence mode="wait">
         {activePhase === 1 && <PhaseHero scrollYProgress={scrollYProgress} />}
-        {activePhase === 2 && <PhasePain />}
+        {activePhase === 2 && <PhasePain scrollYProgress={scrollYProgress} />}
         {activePhase === 3 && <PhaseSolution />}
         {activePhase === 4 && <PhaseAuthority scrollYProgress={scrollYProgress} />}
         {activePhase === 5 && <PhaseCTA />}
