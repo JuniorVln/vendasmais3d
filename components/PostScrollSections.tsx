@@ -1,9 +1,7 @@
 import {
   ArrowRight,
-  Globe2,
   Mail,
   Phone,
-  type LucideIcon,
 } from "lucide-react";
 import Image from "next/image";
 import VmLogo from "./VmLogo";
@@ -54,21 +52,22 @@ const afterCopy = [
   },
 ];
 
-const contacts: Array<{ Icon: LucideIcon; label: string; href: string }> = [
+const contactCards = [
   {
-    Icon: Globe2,
-    label: "www.iavendasmais.com.br",
-    href: "https://www.iavendasmais.com.br",
+    Icon: Phone,
+    prefix: "ATENDIMENTO POR",
+    highlight: "WHATSAPP",
+    sub: "Toque aqui para tirar as suas dúvidas",
+    href: "https://wa.me/5551991387792",
+    linkLabel: null,
   },
   {
     Icon: Mail,
-    label: "contato@iavendasmais.com.br",
+    prefix: "ATENDIMENTO POR",
+    highlight: "EMAIL",
+    sub: "Mande um e-mail agora para",
     href: "mailto:contato@iavendasmais.com.br",
-  },
-  {
-    Icon: Phone,
-    label: "51 9 9138-7792",
-    href: "tel:+5551991387792",
+    linkLabel: "contato@iavendasmais.com.br",
   },
 ];
 
@@ -323,69 +322,56 @@ function FinalCTASection() {
             </div>
 
             {/* Right: contacts */}
-            <div
-              className="rounded-2xl"
-              style={{
-                padding: "32px 28px",
-                background: "rgba(255,255,255,0.04)",
-                border: "1px solid rgba(255,255,255,0.10)",
-                backdropFilter: "blur(18px)",
-                WebkitBackdropFilter: "blur(18px)",
-              }}
-            >
-              <p
-                className="mb-6 text-xs font-black uppercase tracking-[0.24em]"
-                style={{ color: "#2D9CFF" }}
-              >
-                Contatos
-              </p>
-
-              <div className="flex flex-col gap-3">
-                {contacts.map(({ Icon, label, href }) => (
-                  <a
-                    key={label}
-                    href={href}
-                    className="group flex items-center gap-3 rounded-xl px-3 py-3 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-                    style={{ color: "rgba(255,255,255,0.70)" }}
-                    onMouseEnter={(e) =>
-                      ((e.currentTarget as HTMLAnchorElement).style.color =
-                        "#ffffff")
-                    }
-                    onMouseLeave={(e) =>
-                      ((e.currentTarget as HTMLAnchorElement).style.color =
-                        "rgba(255,255,255,0.70)")
-                    }
-                  >
-                    <span
-                      className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full"
-                      style={{
-                        background: "rgba(45,156,255,0.12)",
-                        border: "1px solid rgba(45,156,255,0.26)",
-                      }}
-                    >
-                      <Icon size={16} strokeWidth={2} color="#2D9CFF" />
-                    </span>
-                    <span className="text-sm font-semibold md:text-base">
-                      {label}
-                    </span>
-                  </a>
-                ))}
-              </div>
-
-              {/* Divider + tagline */}
-              <div
-                className="mt-8 pt-6"
-                style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}
-              >
-                <p
-                  className="text-xs font-medium leading-relaxed"
-                  style={{ color: "rgba(255,255,255,0.32)" }}
+            <div className="flex flex-col gap-4">
+              {contactCards.map(({ Icon, prefix, highlight, sub, href, linkLabel }) => (
+                <a
+                  key={highlight}
+                  href={href}
+                  target={highlight === "WHATSAPP" ? "_blank" : undefined}
+                  rel={highlight === "WHATSAPP" ? "noopener noreferrer" : undefined}
+                  className="flex items-center gap-5 rounded-2xl transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                  style={{
+                    padding: "24px 22px",
+                    background: "rgba(255,255,255,0.05)",
+                    border: "1px solid rgba(255,255,255,0.10)",
+                    backdropFilter: "blur(18px)",
+                    WebkitBackdropFilter: "blur(18px)",
+                    textDecoration: "none",
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLAnchorElement).style.background = "rgba(255,255,255,0.08)";
+                    (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(0,116,189,0.40)";
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLAnchorElement).style.background = "rgba(255,255,255,0.05)";
+                    (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(255,255,255,0.10)";
+                  }}
                 >
-                  Horário comercial: seg–sex, 9h às 18h.
-                  <br />
-                  Respondemos em até 24 horas.
-                </p>
-              </div>
+                  <span
+                    className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full"
+                    style={{
+                      background: "rgba(0,116,189,0.12)",
+                      border: "2px solid rgba(0,116,189,0.40)",
+                    }}
+                  >
+                    <Icon size={28} strokeWidth={1.8} color="#0074BD" />
+                  </span>
+                  <div>
+                    <p className="text-sm font-black uppercase leading-tight tracking-wide" style={{ color: "#ffffff" }}>
+                      {prefix}{" "}
+                      <span style={{ color: "#0074BD" }}>{highlight}</span>
+                    </p>
+                    <p className="mt-1 text-sm font-medium leading-snug" style={{ color: "rgba(255,255,255,0.50)" }}>
+                      {sub}
+                    </p>
+                    {linkLabel && (
+                      <p className="mt-0.5 text-sm font-bold" style={{ color: "#0074BD" }}>
+                        {linkLabel}
+                      </p>
+                    )}
+                  </div>
+                </a>
+              ))}
             </div>
           </div>
         </div>
