@@ -11,18 +11,21 @@ interface VMScrollCanvasProps {
   framesPath: string;
 }
 
-const AUTHORITY_PHASE_START = 0.52; // Phase 4 starts here — freeze video frame from this scroll position
+const AUTHORITY_PHASE_START = 0.52;
 const AUTHORITY_PHASE_END = 0.8;
-const AUTHORITY_HOLD_PROGRESS = 0.8; // video position frozen during authority (phone-centered frame)
+const AUTHORITY_HOLD_PROGRESS = 0.739;
+
+type VideoWithVFC = HTMLVideoElement & {
+  requestVideoFrameCallback: (cb: () => void) => number;
+  cancelVideoFrameCallback: (handle: number) => void;
+};
 
 export default function VMScrollCanvas({ scrollYProgress }: VMScrollCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isReady, setIsReady] = useState(false);
   const [loadProgress, setLoadProgress] = useState(0);
-  // Queue pattern: only one seek in-flight at a time, keep latest pending target
-  const seekingRef = useRef(false);
-  const pendingTimeRef = useRef<number | null>(null);
+  const frameHandleRef = useRef<number>(0);
 
   const drawFrame = useCallback(() => {
     const video = videoRef.current;
@@ -54,6 +57,30 @@ export default function VMScrollCanvas({ scrollYProgress }: VMScrollCanvasProps)
     ctx.drawImage(video, x, y, vw * scale, vh * scale);
   }, []);
 
+  // Continuous frame loop: requestVideoFrameCallback (Chrome/Safari) → rAF fallback
+  // Fires whenever the video has a new decoded frame ready — zero wasted draws
+  const startFrameLoop = useCallback((video: HTMLVideoElement) => {
+    const vfc = video as VideoWithVFC;
+    const hasVFC = typeof vfc.requestVideoFrameCallback === "function";
+
+    if (hasVFC) {
+      const onVFC = () => {
+        drawFrame();
+        frameHandleRef.current = vfc.requestVideoFrameCallback(onVFC);
+      };
+      frameHandleRef.current = vfc.requestVideoFrameCallback(onVFC);
+      return () => vfc.cancelVideoFrameCallback(frameHandleRef.current);
+    }
+
+    // rAF fallback: draw every animation frame
+    const onRaf = () => {
+      drawFrame();
+      frameHandleRef.current = requestAnimationFrame(onRaf);
+    };
+    frameHandleRef.current = requestAnimationFrame(onRaf);
+    return () => cancelAnimationFrame(frameHandleRef.current);
+  }, [drawFrame]);
+
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -71,31 +98,24 @@ export default function VMScrollCanvas({ scrollYProgress }: VMScrollCanvasProps)
       setLoadProgress(1);
     };
 
-    // After each seek completes: draw to canvas, then process next queued time
-    const onSeeked = () => {
-      drawFrame();
-      seekingRef.current = false;
-      if (pendingTimeRef.current !== null) {
-        const t = pendingTimeRef.current;
-        pendingTimeRef.current = null;
-        seekingRef.current = true;
-        video.currentTime = t;
-      }
-    };
-
     video.addEventListener("progress", onProgress);
     video.addEventListener("canplay", onCanPlay);
-    video.addEventListener("seeked", onSeeked);
     if (video.readyState >= 3) onCanPlay();
 
     return () => {
       video.removeEventListener("progress", onProgress);
       video.removeEventListener("canplay", onCanPlay);
-      video.removeEventListener("seeked", onSeeked);
     };
   }, [drawFrame]);
 
-  // Redraw on resize (e.g. window resize, orientation change)
+  // Start the frame loop once ready
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!isReady || !video) return;
+    return startFrameLoop(video);
+  }, [isReady, startFrameLoop]);
+
+  // Redraw on resize
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -104,28 +124,21 @@ export default function VMScrollCanvas({ scrollYProgress }: VMScrollCanvasProps)
     return () => obs.disconnect();
   }, [drawFrame]);
 
+  // On scroll: just set currentTime — the frame loop draws when decoded (fire and forget)
   useMotionValueEvent(scrollYProgress, "change", (latest) => {
     const video = videoRef.current;
     if (!video || !isReady) return;
+
     let effectiveProgress: number;
     if (latest < AUTHORITY_PHASE_START) {
-      // Remap [0, 0.6] → [0, 0.8]: phases 1-3 advance the video to the authority hold frame
       effectiveProgress = latest * (AUTHORITY_HOLD_PROGRESS / AUTHORITY_PHASE_START);
     } else if (latest < AUTHORITY_PHASE_END) {
-      // Freeze at the phone-centered frame — no cut, no jump
       effectiveProgress = AUTHORITY_HOLD_PROGRESS;
     } else {
-      // [0.8, 1.0] → [0.8, 1.0]: CTA continues seamlessly
       effectiveProgress = AUTHORITY_HOLD_PROGRESS + (latest - AUTHORITY_PHASE_END);
     }
-    const t = effectiveProgress * video.duration;
-    if (seekingRef.current) {
-      // Overwrite: we only care about the latest scroll position
-      pendingTimeRef.current = t;
-    } else {
-      seekingRef.current = true;
-      video.currentTime = t;
-    }
+
+    video.currentTime = effectiveProgress * video.duration;
   });
 
   return (
@@ -147,7 +160,7 @@ export default function VMScrollCanvas({ scrollYProgress }: VMScrollCanvasProps)
                 className="h-full rounded-full transition-all duration-100"
                 style={{
                   width: `${loadProgress * 100}%`,
-                  backgroundColor: "#C8941A",
+                  backgroundColor: "#D99A1E",
                 }}
               />
             </div>
@@ -161,7 +174,7 @@ export default function VMScrollCanvas({ scrollYProgress }: VMScrollCanvasProps)
         )}
       </AnimatePresence>
 
-      {/* Hidden video — used only as decode source for canvas */}
+      {/* Hidden video — decode source only; canvas renders the frames */}
       <video
         ref={videoRef}
         muted
@@ -170,7 +183,7 @@ export default function VMScrollCanvas({ scrollYProgress }: VMScrollCanvasProps)
         aria-hidden="true"
         className="hidden"
       >
-        {/* vm-scroll.mp4 = keyframe-per-frame (smooth seeking). Run: npm run encode-scroll */}
+        {/* vm-scroll.mp4: keyint=1 — every frame is an independent keyframe */}
         <source src={VIDEO_SCROLL_PATH} type="video/mp4" />
         <source src={VIDEO_FALLBACK_PATH} type="video/mp4" />
       </video>

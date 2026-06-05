@@ -23,7 +23,7 @@ export default function VmLogo({ height = 48, width = 160, className = "" }: VmL
         fontFamily="Montserrat, sans-serif"
         fontSize={Math.round(32 * scale)}
         fontWeight="900"
-        fill="#C8941A"
+        fill="#D99A1E"
         letterSpacing="-1"
       >
         vm+

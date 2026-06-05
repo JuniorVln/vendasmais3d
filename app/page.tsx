@@ -21,7 +21,7 @@ export default function Home() {
       <section
         ref={containerRef}
         className="relative"
-        style={{ height: "600vh" }}
+        style={{ height: "900vh" }}
         aria-label="Experiência interativa de apresentação"
       >
         <div className="sticky top-0 h-screen w-full overflow-hidden">

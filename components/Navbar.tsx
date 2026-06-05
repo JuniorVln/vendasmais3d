@@ -37,16 +37,16 @@ export default function Navbar() {
         aria-label="Quero fazer parte do Vendas Mais"
         className="font-black uppercase tracking-widest px-8 py-3 rounded-full transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-vm-gold hover:scale-105"
         style={{
-          backgroundColor: "#C8941A",
+          backgroundColor: "#FFD245",
           color: "#050A14",
           boxShadow: scrolledFar
-            ? "0 0 24px rgba(200,148,26,0.45)"
-            : "0 0 16px rgba(200,148,26,0.30)",
+            ? "0 0 24px rgba(255,210,69,0.45)"
+            : "0 0 16px rgba(255,210,69,0.30)",
           letterSpacing: "0.14em",
           fontSize: 12,
         }}
-        onMouseEnter={(e) => ((e.currentTarget as HTMLAnchorElement).style.backgroundColor = "#E8A820")}
-        onMouseLeave={(e) => ((e.currentTarget as HTMLAnchorElement).style.backgroundColor = "#C8941A")}
+        onMouseEnter={(e) => ((e.currentTarget as HTMLAnchorElement).style.backgroundColor = "#FFE57A")}
+        onMouseLeave={(e) => ((e.currentTarget as HTMLAnchorElement).style.backgroundColor = "#FFD245")}
       >
         {navData.cta.toUpperCase()}
       </a>

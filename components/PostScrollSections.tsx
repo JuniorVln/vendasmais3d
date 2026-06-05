@@ -1,10 +1,22 @@
+"use client";
+
 import {
   ArrowRight,
   Mail,
   Phone,
 } from "lucide-react";
+import { motion } from "framer-motion";
 import Image from "next/image";
+import VmTitle from "@/components/VmTitle";
+import {
+  inViewFadeUp,
+  inViewFromLeft,
+  inViewFromRight,
+  inViewScale,
+} from "@/lib/motionVariants";
+import { VM_TITLE_ACCENT, VM_TITLE_ON_LIGHT } from "@/lib/vmTitleStyles";
 import VmLogo from "./VmLogo";
+import PlansSection from "./PlansSection";
 
 const beforeCopy = [
   {
@@ -52,6 +64,45 @@ const afterCopy = [
   },
 ];
 
+function BeforeAfterCenterPhone() {
+  return (
+    <>
+      <style>{`
+        @keyframes beforeAfterPhonePulse {
+          0%, 100% {
+            filter: drop-shadow(0 22px 52px rgba(45, 156, 255, 0.18))
+              drop-shadow(0 0 0 rgba(45, 156, 255, 0));
+          }
+          50% {
+            filter: drop-shadow(0 30px 70px rgba(45, 156, 255, 0.34))
+              drop-shadow(0 0 28px rgba(45, 156, 255, 0.16));
+          }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .before-after-phone-pulse {
+            animation: none !important;
+          }
+        }
+      `}</style>
+      <div className="flex h-full w-full items-center justify-center overflow-visible">
+        <Image
+          src="/smartphone-ia-vendas-mais.png"
+          alt="Vendas Mais — inteligência comercial no celular"
+          width={1024}
+          height={1536}
+          className="before-after-phone-pulse block h-full w-auto max-h-[min(72vh,700px)] object-contain object-center"
+          style={{
+            animation: "beforeAfterPhonePulse 2.8s ease-in-out infinite",
+            transform: "scale(1.22)",
+            transformOrigin: "center center",
+          }}
+          priority={false}
+        />
+      </div>
+    </>
+  );
+}
+
 const contactCards = [
   {
     Icon: Phone,
@@ -85,54 +136,46 @@ function BeforeAfterSection() {
       aria-labelledby="before-after-heading"
     >
       <div
-        className="relative w-full overflow-hidden"
+        className="relative w-full overflow-visible"
         style={{
           minHeight: 760,
-          padding: "72px max(32px, calc((100vw - 1180px) / 2)) 80px",
+          padding: "clamp(56px, 8vw, 72px) max(20px, calc((100vw - 1180px) / 2)) 80px",
           background:
             "linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(244,249,255,0.98) 100%)",
           boxShadow: "0 40px 120px rgba(0,0,0,0.35)",
         }}
       >
-        <div className="mb-10 flex justify-center">
-          <span
-            className="inline-flex items-center gap-2 text-xs font-black uppercase"
+        <motion.div {...inViewFadeUp} style={{ marginBottom: "clamp(48px, 6vw, 96px)" }}>
+          <VmTitle
+            as="h2"
+            id="before-after-heading"
+            center
+            onLight
+            className="w-full"
             style={{
-              letterSpacing: "0.22em",
-              padding: "10px 24px",
-              borderRadius: 999,
-              border: "1px solid rgba(45,156,255,0.18)",
-              background: "rgba(255,255,255,0.78)",
-              color: "#2D9CFF",
-              boxShadow: "0 12px 32px rgba(45,156,255,0.12)",
+              display: "block",
+              marginLeft: "auto",
+              marginRight: "auto",
             }}
+            lines={["Do improviso para uma", "operação comercial previsível"]}
+          />
+        </motion.div>
+
+        <div className="mx-auto grid w-full max-w-[1180px] items-stretch justify-center gap-12 overflow-visible lg:grid-cols-[380px_minmax(200px,320px)_380px]">
+          <motion.div
+            className="flex w-full flex-col gap-5 text-left lg:text-right"
+            {...inViewFromLeft}
+            transition={{ ...inViewFromLeft.transition, delay: 0.08 }}
           >
-            Antes e Depois
-          </span>
-        </div>
-
-        <h2
-          id="before-after-heading"
-          className="w-full text-center font-black leading-[1.06] tracking-[-0.035em]"
-          style={{
-            fontSize: "clamp(28px, 2.65vw, 42px)",
-            color: "#0A1628",
-            display: "block",
-            marginLeft: "auto",
-            marginRight: "auto",
-            marginBottom: "clamp(48px, 6vw, 96px)",
-          }}
-        >
-          Do improviso para uma
-          <br />
-          <span style={{ color: "#2D9CFF" }}>operação comercial previsível.</span>
-        </h2>
-
-        <div className="mx-auto grid w-full max-w-[1180px] items-center justify-center gap-12 lg:grid-cols-[380px_260px_380px]">
-          <div className="flex w-full flex-col gap-5 text-right">
-            {beforeCopy.map((item) => (
-              <div key={item.title}>
-                <h3 className="text-xl font-black leading-tight" style={{ color: "#637A9B" }}>
+            {beforeCopy.map((item, index) => (
+              <motion.div
+                key={item.title}
+                initial={{ opacity: 0, x: -32, y: 12 }}
+                whileInView={{ opacity: 1, x: 0, y: 0 }}
+                viewport={{ once: true, amount: 0.15 }}
+                transition={{ duration: 0.55, delay: 0.12 + index * 0.07 }}
+              >
+                <h3 className="text-lg font-black leading-tight" style={{ color: VM_TITLE_ON_LIGHT }}>
                   {item.title}
                 </h3>
                 <p
@@ -141,46 +184,32 @@ function BeforeAfterSection() {
                 >
                   {item.body}
                 </p>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
 
-          <div className="relative hidden w-full items-center justify-center lg:flex">
-            <style>{`
-              @keyframes logoPulse {
-                0%, 100% {
-                  box-shadow: 0 24px 70px rgba(45,156,255,0.14),
-                              0 0 0 0px rgba(45,156,255,0.10);
-                }
-                50% {
-                  box-shadow: 0 24px 70px rgba(45,156,255,0.24),
-                              0 0 0 18px rgba(45,156,255,0.06);
-                }
-              }
-            `}</style>
-            <div
-              className="relative flex h-56 w-56 items-center justify-center rounded-full"
-              style={{
-                background: "#ffffff",
-                border: "1px solid rgba(45,156,255,0.16)",
-                animation: "logoPulse 2.8s ease-in-out infinite",
-              }}
-            >
-              <Image
-                src="/logo-vendas-mais-oficial.png"
-                alt="Vendas Mais"
-                width={138}
-                height={72}
-                className="h-auto w-[138px]"
-                priority={false}
-              />
-            </div>
-          </div>
+          <motion.div
+            className="relative hidden h-full min-h-0 w-full items-center justify-center self-stretch overflow-visible lg:flex"
+            {...inViewScale}
+            transition={{ ...inViewScale.transition, delay: 0.15 }}
+          >
+            <BeforeAfterCenterPhone />
+          </motion.div>
 
-          <div className="flex w-full flex-col gap-5 text-left">
-            {afterCopy.map((item) => (
-              <div key={item.title}>
-                <h3 className="text-xl font-black leading-tight" style={{ color: "#2D9CFF" }}>
+          <motion.div
+            className="flex w-full flex-col gap-5 text-left"
+            {...inViewFromRight}
+            transition={{ ...inViewFromRight.transition, delay: 0.08 }}
+          >
+            {afterCopy.map((item, index) => (
+              <motion.div
+                key={item.title}
+                initial={{ opacity: 0, x: 32, y: 12 }}
+                whileInView={{ opacity: 1, x: 0, y: 0 }}
+                viewport={{ once: true, amount: 0.15 }}
+                transition={{ duration: 0.55, delay: 0.12 + index * 0.07 }}
+              >
+                <h3 className="text-lg font-black leading-tight" style={{ color: VM_TITLE_ACCENT }}>
                   {item.title}
                 </h3>
                 <p
@@ -189,9 +218,9 @@ function BeforeAfterSection() {
                 >
                   {item.body}
                 </p>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>
@@ -218,7 +247,7 @@ function FinalCTASection() {
         className="absolute inset-x-0 top-0 h-px"
         style={{
           background:
-            "linear-gradient(90deg, transparent 0%, rgba(200,148,26,0.30) 30%, rgba(200,148,26,0.30) 70%, transparent 100%)",
+            "linear-gradient(90deg, transparent 0%, rgba(217,154,30,0.30) 30%, rgba(217,154,30,0.30) 70%, transparent 100%)",
         }}
       />
 
@@ -232,7 +261,7 @@ function FinalCTASection() {
           width: 700,
           height: 420,
           background:
-            "radial-gradient(ellipse at center, rgba(200,148,26,0.06) 0%, rgba(45,156,255,0.04) 50%, transparent 80%)",
+            "radial-gradient(ellipse at center, rgba(217,154,30,0.06) 0%, rgba(45,156,255,0.04) 50%, transparent 80%)",
           filter: "blur(48px)",
         }}
       />
@@ -244,9 +273,9 @@ function FinalCTASection() {
           style={{
             background:
               "linear-gradient(135deg, rgba(8,28,52,0.95) 0%, rgba(5,10,20,0.98) 55%, rgba(32,22,8,0.94) 100%)",
-            border: "1px solid rgba(200,148,26,0.32)",
+            border: "1px solid rgba(217,154,30,0.32)",
             boxShadow:
-              "0 40px 100px rgba(0,0,0,0.48), inset 0 1px 0 rgba(255,255,255,0.10), 0 0 0 1px rgba(200,148,26,0.05)",
+              "0 40px 100px rgba(0,0,0,0.48), inset 0 1px 0 rgba(255,255,255,0.10), 0 0 0 1px rgba(217,154,30,0.05)",
             padding: "clamp(40px, 6vw, 72px)",
           }}
         >
@@ -255,7 +284,7 @@ function FinalCTASection() {
             className="absolute inset-x-0 top-0 h-px rounded-full"
             style={{
               background:
-                "linear-gradient(90deg, transparent 5%, rgba(200,148,26,0.48) 40%, rgba(200,148,26,0.48) 60%, transparent 95%)",
+                "linear-gradient(90deg, transparent 5%, rgba(217,154,30,0.48) 40%, rgba(217,154,30,0.48) 60%, transparent 95%)",
               position: "relative",
               marginBottom: 0,
             }}
@@ -271,15 +300,12 @@ function FinalCTASection() {
                 style={{ height: 44, width: "auto", marginBottom: 40, opacity: 0.92 }}
               />
 
-              <h2
+              <VmTitle
+                as="h2"
                 id="final-cta-heading"
-                className="font-black leading-[1.08] tracking-[-0.03em]"
-                style={{ fontSize: "clamp(28px, 3vw, 48px)", maxWidth: 480 }}
-              >
-                <span className="text-white">Aumente sua conversão.</span>
-                <br />
-                <span style={{ color: "#C8941A" }}>Reduza seus custos.</span>
-              </h2>
+                lines={["Aumente sua conversão", "Reduza seus custos"]}
+                style={{ maxWidth: 480 }}
+              />
 
               <p
                 className="font-medium leading-relaxed"
@@ -300,20 +326,20 @@ function FinalCTASection() {
                 className="inline-flex items-center justify-center gap-3 rounded-full font-black uppercase tracking-[0.14em] transition-all duration-300 hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
                 style={{
                   marginTop: 36,
-                  backgroundColor: "#C8941A",
+                  backgroundColor: "#FFD245",
                   color: "#050A14",
                   fontSize: 13,
                   padding: "17px 52px",
                   boxShadow:
-                    "0 0 40px rgba(200,148,26,0.40), 0 0 0 1px rgba(200,148,26,0.34), inset 0 1px 0 rgba(255,255,255,0.18)",
+                    "0 0 40px rgba(255,210,69,0.40), 0 0 0 1px rgba(255,210,69,0.34), inset 0 1px 0 rgba(255,255,255,0.18)",
                 }}
                 onMouseEnter={(e) =>
                   ((e.currentTarget as HTMLAnchorElement).style.backgroundColor =
-                    "#E8A820")
+                    "#FFE57A")
                 }
                 onMouseLeave={(e) =>
                   ((e.currentTarget as HTMLAnchorElement).style.backgroundColor =
-                    "#C8941A")
+                    "#FFD245")
                 }
               >
                 Agendar demonstração
@@ -395,6 +421,7 @@ export default function PostScrollSections() {
   return (
     <>
       <BeforeAfterSection />
+      <PlansSection />
       <FinalCTASection />
     </>
   );

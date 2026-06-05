@@ -1,7 +1,7 @@
 "use client";
 
 import { MotionValue, motion, AnimatePresence, useMotionValueEvent, useTransform } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   BarChart3,
   Bot,
@@ -9,15 +9,29 @@ import {
   Clock3,
   Database,
   FolderOpen,
+  GraduationCap,
   KanbanSquare,
   Link2,
   PhoneCall,
   RefreshCw,
   Smartphone,
   Target,
-  UsersRound,
   type LucideIcon,
 } from "lucide-react";
+import VmTitle, { VmTitleAccent } from "@/components/VmTitle";
+import {
+  easeInExpo,
+  easeOutExpo,
+  phaseEnter,
+  phaseExit,
+  phaseVisible,
+  vmTransition,
+} from "@/lib/motionVariants";
+import {
+  vmTitleAccentStyle,
+  vmTitleLineBase,
+  vmTitleWhiteStyle,
+} from "@/lib/vmTitleStyles";
 
 interface VMExperienceProps {
   scrollYProgress: MotionValue<number>;
@@ -31,64 +45,56 @@ function useActivePhase(scrollYProgress: MotionValue<number>): Phase {
     if (v < 0.14) setPhase(1);
     else if (v < 0.28) setPhase(2);
     else if (v < 0.52) setPhase(3);
-    else if (v < 0.80) setPhase(4);
+    else if (v < 0.85) setPhase(4);
     else setPhase(5);
   });
   return phase;
 }
 
-const enter = { opacity: 0, y: 20 } as const;
-const center = { opacity: 1, y: 0 } as const;
-const exitUp = { opacity: 0, y: -16, transition: { duration: 0.35 } };
-const tx = { duration: 0.5, ease: [0, 0, 0.2, 1] as const };
-const ctaButtonStyle: React.CSSProperties = {
-  backgroundColor: "#C8941A",
+const tx = vmTransition;
+const vmGold = "#FFD245";
+const vmGoldLight = "#FFE57A";
+
+/** CTAs do scroll — mesma altura; largura proporcional ao texto (hero = referência). */
+const vmCtaButtonStyle: React.CSSProperties = {
+  backgroundColor: vmGold,
   color: "#050A14",
-  boxShadow: "0 0 32px rgba(200,148,26,0.45), 0 0 0 1px rgba(200,148,26,0.40)",
-  fontSize: 12,
-  letterSpacing: "0.16em",
-  padding: "15px 48px",
-  textTransform: "uppercase",
+  boxShadow: "0 0 32px rgba(255,210,69,0.46), 0 0 0 1px rgba(255,210,69,0.40)",
+  fontSize: 11,
+  letterSpacing: "0.06em",
+  padding: "10px 26px",
+  lineHeight: 1.2,
+  textTransform: "none",
+  whiteSpace: "nowrap",
 };
+
+function VmCtaLink({
+  label,
+  href = "#contato",
+  className = "",
+}: {
+  label: string;
+  href?: string;
+  className?: string;
+}) {
+  return (
+    <a
+      href={href}
+      className={`pointer-events-auto rounded-full font-semibold tracking-wide transition-all duration-300 hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${className}`}
+      style={vmCtaButtonStyle}
+      onMouseEnter={(e) => ((e.currentTarget as HTMLAnchorElement).style.backgroundColor = vmGoldLight)}
+      onMouseLeave={(e) => ((e.currentTarget as HTMLAnchorElement).style.backgroundColor = vmGold)}
+      aria-label={label}
+    >
+      {label} ↗
+    </a>
+  );
+}
 
 // Shared text shadow for readability on raw video
 const ts: React.CSSProperties = {
   textShadow: "0 2px 16px rgba(0,0,0,1), 0 0 40px rgba(0,0,0,0.95)",
 };
-
-// ─── Marquee ─────────────────────────────────────────────────────
-function Marquee({ pills, bottom = 64 }: { pills: string[]; bottom?: number }) {
-  const doubled = [...pills, ...pills];
-  return (
-    <div className="absolute left-0 right-0 overflow-hidden pointer-events-none" style={{ bottom }}>
-      <div className="flex animate-marquee whitespace-nowrap gap-2 px-0">
-        {doubled.map((p, i) => (
-          <span
-            key={i}
-            className="rounded-full text-[10px] font-bold uppercase"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              minHeight: 24,
-              padding: "6px 16px",
-              lineHeight: 1,
-              color: "rgba(255,255,255,0.92)",
-              background:
-                "linear-gradient(180deg, rgba(111,91,64,0.90) 0%, rgba(65,54,42,0.92) 100%)",
-              border: "1px solid rgba(219,185,115,0.92)",
-              boxShadow:
-                "inset 0 1px 0 rgba(255,255,255,0.26), 0 0 8px rgba(210,174,103,0.30)",
-              letterSpacing: "0.01em",
-            }}
-          >
-            {p}
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-}
 
 // ─── Gold CTA button (bottom-center) ─────────────────────────────
 function BottomCTA({
@@ -96,39 +102,31 @@ function BottomCTA({
   note,
   compact = false,
   placement = "bottom",
+  href = "#contato",
 }: {
   label: string;
   note?: string;
   compact?: boolean;
   placement?: "bottom" | "heroTopRight" | "painCardsRight";
+  href?: string;
 }) {
   const isHeroTopRight = placement === "heroTopRight";
   const isPainCardsRight = placement === "painCardsRight";
 
   return (
     <div
-      className="absolute flex flex-col items-center gap-2 pointer-events-none"
+      className={`absolute flex flex-col gap-2 pointer-events-none ${
+        isPainCardsRight ? "items-end" : "items-center"
+      }`}
       style={
         isHeroTopRight
           ? { top: "12.2%", right: "5.8%" }
           : isPainCardsRight
-            ? { top: "79%", right: "5.3%" }
+            ? { top: "79%", left: "58%", right: "3.2%" }
           : { bottom: compact ? 14 : 24, left: 0, right: 0 }
       }
     >
-      <a
-        href="#cta"
-        className="pointer-events-auto font-black uppercase tracking-widest rounded-full transition-all duration-300 hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-        style={{
-          ...ctaButtonStyle,
-          padding: isHeroTopRight ? "15px 36px" : ctaButtonStyle.padding,
-        }}
-        onMouseEnter={(e) => ((e.currentTarget as HTMLAnchorElement).style.backgroundColor = "#E8A820")}
-        onMouseLeave={(e) => ((e.currentTarget as HTMLAnchorElement).style.backgroundColor = "#C8941A")}
-        aria-label={label}
-      >
-        {label.toUpperCase()} ↗
-      </a>
+      <VmCtaLink label={label} href={href} />
       {note && (
         <p className="text-xs font-medium pointer-events-none" style={{ color: "rgba(255,255,255,0.35)", ...ts }}>
           {note}
@@ -169,7 +167,7 @@ function FeatureCard({ Icon, title, body, badge }: ChipCard) {
         {badge && (
           <span
             className="text-[7px] font-black uppercase tracking-wide px-1.5 py-0.5 rounded-full"
-            style={{ backgroundColor: "#DCA832", color: "#050A14" }}
+            style={{ backgroundColor: vmGold, color: "#050A14" }}
           >
             {badge}
           </span>
@@ -194,101 +192,96 @@ function FeatureCard({ Icon, title, body, badge }: ChipCard) {
 
 // ─── PHASE 1: HERO ────────────────────────────────────────────────
 // Cena 01: phone centered-right, dark space bg
-const heroCards: Array<ChipCard & { position: React.CSSProperties; opacity?: number }> = [
+const heroCardsGridTop = "39.5%";
+const heroCardsGridBottom = "13%"; // base dos cards alinhada à parte inferior do celular
+const heroLeftAlignRight = "34%"; // borda direita dos cards (linha vermelha)
+const heroRightAlignLeft = "65.4%"; // borda esquerda dos cards (Pipeline Visual)
+
+type HeroCard = ChipCard & { opacity?: number };
+
+const heroCardsLeft: HeroCard[] = [
   {
     Icon: Database,
     title: "CRM Inteligente",
     body: "Leads, histórico e oportunidades organizados em um só lugar.",
-    position: { top: "46.2%", left: "18.8%" },
     opacity: 0.9,
   },
   {
     Icon: Clock3,
     title: "Resposta Rápida",
     body: "Reduza o tempo entre o primeiro contato e a próxima ação.",
-    position: { top: "59.2%", left: "13.4%" },
     opacity: 0.96,
   },
   {
     Icon: Bot,
     title: "IA Comercial",
     body: "Sugestões de abordagem com base no perfil e etapa do lead.",
-    position: { top: "71.8%", left: "24.2%" },
     opacity: 0.92,
   },
+];
+
+const heroCardsRight: HeroCard[] = [
   {
     Icon: RefreshCw,
     title: "Follow-up Automático",
     body: "Lembretes e ações para nenhuma oportunidade esfriar.",
-    position: { top: "25.2%", left: "59.4%" },
     opacity: 0.95,
   },
   {
     Icon: KanbanSquare,
     title: "Pipeline Visual",
     body: "Acompanhe cada negociação do primeiro contato ao fechamento.",
-    position: { top: "38.8%", left: "65.4%" },
     opacity: 0.9,
   },
   {
     Icon: CalendarDays,
     title: "Agenda Integrada",
     body: "Reuniões, retornos e compromissos comerciais sempre no radar.",
-    position: { top: "52.4%", left: "67.5%" },
     opacity: 0.9,
   },
   {
     Icon: BarChart3,
     title: "Dashboard de Gestão",
     body: "Metas, performance e oportunidades em uma visão simples.",
-    position: { top: "66.2%", left: "61.8%" },
     opacity: 0.95,
   },
 ];
 
-const heroMarquee = [
-  "INTEGRAÇÃO CRM",
-  "PONTUAÇÃO DE LEADS",
-  "ROTEIROS DE VENDAS",
-  "PAINEL DE PERFORMANCE",
-  "AUTOMAÇÃO DE EMAIL",
-  "ACADEMIA VENDAS MAIS",
-  "INTELIGÊNCIA DE MERCADO",
-  "CHATBOT IA",
-  "TÉCNICAS DE NEGOCIAÇÃO",
+const heroCardRows: Array<{ left?: HeroCard; right?: HeroCard }> = [
+  { right: heroCardsRight[0] },
+  { left: heroCardsLeft[0], right: heroCardsRight[1] },
+  { left: heroCardsLeft[1], right: heroCardsRight[2] },
+  { left: heroCardsLeft[2], right: heroCardsRight[3] },
 ];
 
 function PhaseHero({ scrollYProgress }: { scrollYProgress: MotionValue<number> }) {
-  const e = tx.ease;
+  const e = easeOutExpo;
 
   // Scroll-driven exit: Phase 1 exits from scroll 0.13 → 0.20
   const exitP = useTransform(scrollYProgress, [0.06, 0.14], [0, 1]);
 
   // Text block exits upward
-  const textExitY  = useTransform(exitP, [0, 1],    [0, -44]);
+  const textExitY  = useTransform(exitP, [0, 1],    [0, -60]);
   const textExitOp = useTransform(exitP, [0, 0.72], [1, 0]);
 
   // CTA fades slightly behind
   const ctaExitOp  = useTransform(exitP, [0.08, 0.76], [1, 0]);
 
   // Left cards slide further left
-  const leftExitX  = useTransform(exitP, [0.06, 0.9],  [0, -52]);
+  const leftExitX  = useTransform(exitP, [0.06, 0.9],  [0, -72]);
   const leftExitOp = useTransform(exitP, [0.06, 0.84], [1, 0]);
 
   // Right cards slide further right
-  const rightExitX  = useTransform(exitP, [0,    0.84], [0, 52]);
+  const rightExitX  = useTransform(exitP, [0,    0.84], [0, 72]);
   const rightExitOp = useTransform(exitP, [0,    0.78], [1, 0]);
-
-  // Marquee fades first
-  const marqExitOp = useTransform(exitP, [0, 0.42], [1, 0]);
 
   return (
     <motion.div
       key="phase-1"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0, transition: { duration: 0.08 } }}
-      transition={{ duration: 0.25 }}
+      initial={phaseEnter}
+      animate={phaseVisible}
+      exit={phaseExit}
+      transition={vmTransition}
       className="absolute inset-0"
     >
       {/* ── TEXT BLOCK — exits upward ── */}
@@ -298,49 +291,53 @@ function PhaseHero({ scrollYProgress }: { scrollYProgress: MotionValue<number> }
       >
         {/* Logo oficial */}
         <motion.div
-          initial={{ opacity: 0, y: 14 }}
+          initial={{ opacity: 0, y: 28 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.55, delay: 0, ease: e }}
-          style={{ marginBottom: 20 }}
+          transition={{ duration: 0.62, delay: 0, ease: e }}
+          style={{ marginBottom: 32 }}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/logo-vendas-mais-oficial-colorido.png"
             alt="Vendas Mais"
-            style={{ height: "clamp(32px, 2.8vw, 46px)", width: "auto" }}
+            style={{ width: 130, height: "auto", overflow: "hidden" }}
           />
         </motion.div>
 
         <div style={{ overflow: "hidden" }}>
           <motion.div
-            initial={{ y: 52, opacity: 0 }}
+            initial={{ y: 72, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.7, delay: 0.08, ease: e }}
+            transition={{ duration: 0.72, delay: 0.08, ease: e }}
           >
-            <span className="font-black block" style={{ color: "#ffffff", fontSize: "clamp(30px, 2.9vw, 54px)", lineHeight: 1.02, letterSpacing: "-0.025em", whiteSpace: "nowrap", ...ts }}>
-              Mais vendas.
+            <span className="font-black block" style={{ ...vmTitleWhiteStyle, whiteSpace: "nowrap", ...ts }}>
+              Mais vendas
             </span>
           </motion.div>
         </div>
         <div style={{ overflow: "hidden" }}>
           <motion.div
-            initial={{ y: 52, opacity: 0 }}
+            initial={{ y: 72, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.7, delay: 0.18, ease: e }}
+            transition={{ duration: 0.72, delay: 0.18, ease: e }}
           >
-            <span className="font-black block" style={{ color: "#2D9CFF", fontSize: "clamp(30px, 2.9vw, 54px)", lineHeight: 1.02, letterSpacing: "-0.025em", whiteSpace: "nowrap", ...ts }}>
-              Menos improviso.
+            <span className="font-black block" style={{ ...vmTitleAccentStyle, whiteSpace: "nowrap", ...ts }}>
+              Menos improviso
             </span>
           </motion.div>
         </div>
         <motion.p
           className="mt-5 text-sm font-medium leading-relaxed"
           style={{ maxWidth: "min(35vw, 480px)", color: "rgba(255,255,255,0.78)", ...ts }}
-          initial={{ opacity: 0, y: 14 }}
+          initial={{ opacity: 0, y: 28 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.34, ease: e }}
+          transition={{ duration: 0.65, delay: 0.34, ease: e }}
         >
-          CRM, IA e automação comercial para organizar leads, acelerar respostas e transformar oportunidades em vendas reais.
+          CRM, IA e automação comercial para organizar
+          <br />
+          leads, acelerar respostas e transformar
+          <br />
+          oportunidades em vendas reais.
         </motion.p>
       </motion.div>
 
@@ -350,46 +347,72 @@ function PhaseHero({ scrollYProgress }: { scrollYProgress: MotionValue<number> }
           className="absolute inset-0 pointer-events-none"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.55, delay: 0.22, ease: e }}
+          transition={{ duration: 0.62, delay: 0.22, ease: e }}
         >
-          <BottomCTA label="Quero fazer parte" placement="heroTopRight" />
+          <BottomCTA label="Quero vender mais" placement="heroTopRight" />
         </motion.div>
       </motion.div>
 
-      {/* ── FEATURE CARDS — entrance from edges, exit back to edges ── */}
-      {heroCards.map(({ position, opacity: cardOpacity, ...feature }, index) => {
-        const leftPct = parseFloat((position.left as string) ?? "50");
-        const isLeft = leftPct < 50;
-        return (
-          // outer: absolute position + scroll-driven exit
-          <motion.div
-            key={feature.title}
-            className="absolute pointer-events-none"
-            style={{ ...position, x: isLeft ? leftExitX : rightExitX, opacity: isLeft ? leftExitOp : rightExitOp }}
-          >
-            {/* inner: timed entrance only */}
-            <motion.div
-              initial={{ opacity: 0, x: isLeft ? -36 : 36, y: 8 }}
-              animate={{ opacity: cardOpacity ?? 1, x: 0, y: 0 }}
-              transition={{ duration: 0.55, delay: 0.38 + index * 0.09, ease: e }}
-            >
-              <FeatureCard {...feature} />
-            </motion.div>
-          </motion.div>
-        );
-      })}
-
-      {/* ── MARQUEE — scroll exit (fades first) + timed entrance ── */}
-      <motion.div className="absolute inset-0 pointer-events-none" style={{ opacity: marqExitOp }}>
-        <motion.div
-          className="absolute inset-0 pointer-events-none"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.94 }}
-        >
-          <Marquee pills={heroMarquee} bottom={56} />
-        </motion.div>
-      </motion.div>
+      {/* ── FEATURE CARDS — grade 4 linhas (esq. alinha à direita; dir. alinha à esquerda) ── */}
+      <div
+        className="absolute inset-x-0 pointer-events-none"
+        style={{
+          top: heroCardsGridTop,
+          bottom: heroCardsGridBottom,
+          display: "grid",
+          gridTemplateRows: "repeat(4, 1fr)",
+        }}
+      >
+        {(() => {
+          let animIndex = 0;
+          return heroCardRows.map((row, rowIndex) => (
+            <div key={rowIndex} className="relative">
+              {row.left && (() => {
+                const delay = 0.38 + animIndex++ * 0.09;
+                return (
+                  <motion.div
+                    className="absolute top-1/2 -translate-y-1/2"
+                    style={{
+                      right: `calc(100% - ${heroLeftAlignRight})`,
+                      x: leftExitX,
+                      opacity: leftExitOp,
+                    }}
+                  >
+                    <motion.div
+                      initial={{ opacity: 0, x: -56, y: 20 }}
+                      animate={{ opacity: row.left!.opacity ?? 1, x: 0, y: 0 }}
+                      transition={{ duration: 0.62, delay, ease: e }}
+                    >
+                      <FeatureCard {...row.left!} />
+                    </motion.div>
+                  </motion.div>
+                );
+              })()}
+              {row.right && (() => {
+                const delay = 0.38 + animIndex++ * 0.09;
+                return (
+                  <motion.div
+                    className="absolute top-1/2 -translate-y-1/2"
+                    style={{
+                      left: heroRightAlignLeft,
+                      x: rightExitX,
+                      opacity: rightExitOp,
+                    }}
+                  >
+                    <motion.div
+                      initial={{ opacity: 0, x: 56, y: 20 }}
+                      animate={{ opacity: row.right!.opacity ?? 1, x: 0, y: 0 }}
+                      transition={{ duration: 0.62, delay, ease: e }}
+                    >
+                      <FeatureCard {...row.right!} />
+                    </motion.div>
+                  </motion.div>
+                );
+              })()}
+            </div>
+          ));
+        })()}
+      </div>
     </motion.div>
   );
 }
@@ -406,81 +429,97 @@ const painPoints: Array<{
   { Icon: PhoneCall, title: "FALTA DE FOLLOW-UP", body: "Muitas vendas acontecem no segundo, terceiro ou quinto contato.", bold: "Não desista." },
   { Icon: FolderOpen, title: "FALTA DE ORGANIZAÇÃO", body: "Oportunidades se perdem entre planilhas, WhatsApp e anotações.", bold: "Centralize tudo." },
   { Icon: Target, title: "LEADS NÃO QUALIFICADOS", body: "Abordagem genérica reduz conexão e conversão.", bold: "Qualifique com precisão." },
-  { Icon: UsersRound, title: "EQUIPE SOBRECARREGADA", body: "Vendedores gastam tempo organizando em vez de vender.", bold: "Libere-os." },
 ];
 
+/** Faixa horizontal dos 4 pain cards (fase 2) — título/CTA alinham sem mover os boxes. */
+const painCardsBand = { left: "58%", right: "3.2%" } as const;
+const painCardsGridStyle = {
+  ...painCardsBand,
+  gridTemplateColumns: "repeat(4, clamp(118px, 10.2vw, 158px))",
+  columnGap: "0.625rem", // gap-2.5
+  justifyContent: "end",
+} as const;
+
 function PhasePain({ scrollYProgress }: { scrollYProgress: MotionValue<number> }) {
-  const e = tx.ease;
+  const e = easeOutExpo;
 
   // Scroll-driven exit: starts fading at 0.20, fully gone by 0.28
   const exitP = useTransform(scrollYProgress, [0.20, 0.28], [0, 1]);
 
-  const headlineExitY  = useTransform(exitP, [0, 1],    [0, -44]);
+  const headlineExitY  = useTransform(exitP, [0, 1],    [0, -60]);
   const headlineExitOp = useTransform(exitP, [0, 0.72], [1, 0]);
-  const cardsExitY     = useTransform(exitP, [0.05, 1], [0, -28]);
+  const cardsExitY     = useTransform(exitP, [0.05, 1], [0, -44]);
   const cardsExitOp    = useTransform(exitP, [0.05, 0.88], [1, 0]);
   const ctaExitOp      = useTransform(exitP, [0, 0.55], [1, 0]);
 
   return (
     <motion.div
       key="phase-2"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={exitUp}
-      transition={{ duration: 0.2 }}
+      initial={phaseEnter}
+      animate={phaseVisible}
+      exit={phaseExit}
+      transition={vmTransition}
       className="absolute inset-0"
     >
-      {/* Headline — scroll-driven exit wrapper + entrance animation */}
+      {/* Headline — grid igual à fileira dos cards: borda esq. = 1º box */}
       <motion.div
-        className="absolute"
-        style={{ top: "6.3%", right: "4%", maxWidth: "59%", textAlign: "right", y: headlineExitY, opacity: headlineExitOp }}
+        className="absolute grid"
+        style={{
+          top: "6.3%",
+          ...painCardsGridStyle,
+          y: headlineExitY,
+          opacity: headlineExitOp,
+        }}
       >
-        <motion.div
-          initial={{ opacity: 0, x: 48 }}
+        <motion.h2
+          className="font-black text-left"
+          style={{
+            gridColumn: "1 / -1",
+            justifySelf: "start",
+            ...vmTitleLineBase,
+            color: "#ffffff",
+            ...ts,
+          }}
+          initial={{ opacity: 0, x: 56 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.65, delay: 0.05, ease: e }}
+          transition={{ duration: 0.68, delay: 0.05, ease: e }}
         >
-          <h2
-            className="font-black"
-            style={{ color: "#ffffff", fontSize: "clamp(34px, 3.45vw, 62px)", lineHeight: 1.08, letterSpacing: "-0.02em", ...ts }}
-          >
-            Quantos <span style={{ color: "#C8941A" }}>leads</span> sua empresa
-            <br />
-            deixa de <span style={{ color: "#C8941A" }}>aproveitar</span> todos os
-            <br />
-            dias?
-          </h2>
-        </motion.div>
+          Quantos leads sua
+          <br />
+          empresa deixa de
+          <br />
+          <VmTitleAccent>aproveitar todos os dias?</VmTitleAccent>
+        </motion.h2>
       </motion.div>
 
-      {/* Pain cards — scroll-driven exit wrapper + stagger entrance */}
+      {/* Pain cards — 4 boxes estreitos, alinhados à direita (fora do celular) */}
       <motion.div
-        className="absolute grid grid-cols-5 gap-3"
-        style={{ top: "39.2%", left: "43.8%", right: "3.2%", y: cardsExitY, opacity: cardsExitOp }}
+        className="absolute flex justify-end gap-2.5"
+        style={{ top: "39.2%", ...painCardsBand, y: cardsExitY, opacity: cardsExitOp }}
       >
         {painPoints.map((p, index) => (
           <motion.div
             key={p.title}
-            className="flex min-h-[196px] flex-col items-center gap-3 rounded-2xl"
+            className="flex min-h-[194px] flex-[0_0_clamp(118px,10.2vw,158px)] flex-col items-center gap-3 rounded-2xl"
             style={{
-              padding: "24px 18px 22px",
+              padding: "22px 15px 20px",
               backgroundColor: "rgba(5,10,20,0.68)",
               backdropFilter: "blur(14px)",
               WebkitBackdropFilter: "blur(14px)",
-              border: "1px solid rgba(200,148,26,0.58)",
+              border: "1px solid rgba(217,154,30,0.58)",
               boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), 0 12px 32px rgba(0,0,0,0.36)",
             }}
-            initial={{ opacity: 0, y: 36 }}
+            initial={{ opacity: 0, y: 52 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.55, delay: 0.18 + index * 0.1, ease: e }}
+            transition={{ duration: 0.62, delay: 0.18 + index * 0.1, ease: e }}
           >
             <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center">
-              <p.Icon size={24} strokeWidth={1.8} color="#DCA832" />
+              <p.Icon size={23} strokeWidth={1.8} color={vmGold} />
             </div>
-            <p className="text-center text-[13px] font-black uppercase leading-tight tracking-wide" style={{ color: "#ffffff", ...ts }}>
+            <p className="text-center text-[12px] font-black uppercase leading-tight tracking-wide" style={{ color: "#ffffff", ...ts }}>
               {p.title}
             </p>
-            <p className="text-center text-[12px] leading-snug" style={{ color: "rgba(255,255,255,0.78)" }}>
+            <p className="text-center text-[11.5px] leading-snug" style={{ color: "rgba(255,255,255,0.78)" }}>
               {p.body}{" "}
               <span className="font-bold text-white">{p.bold}</span>
             </p>
@@ -499,7 +538,7 @@ function PhasePain({ scrollYProgress }: { scrollYProgress: MotionValue<number> }
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.22, ease: e }}
         >
-          <BottomCTA label="QUERO MAIS RESULTADOS" placement="painCardsRight" />
+          <BottomCTA label="Quero mais vendas" placement="painCardsRight" />
         </motion.div>
       </motion.div>
     </motion.div>
@@ -509,36 +548,33 @@ function PhasePain({ scrollYProgress }: { scrollYProgress: MotionValue<number> }
 // ─── PHASE 3: SOLUTION ────────────────────────────────────────────
 // Cena 03: dashboard left + AURA phone right (3D renders). Text left only.
 function PhaseSolution({ scrollYProgress }: { scrollYProgress: MotionValue<number> }) {
-  // Scroll-driven exit: starts fading at 0.44, fully gone by 0.52
-  const exitP = useTransform(scrollYProgress, [0.44, 0.52], [0, 1]);
+  // Scroll-driven exit: fully gone by ~0.39 — well before the video hold at 0.52
+  const exitP = useTransform(scrollYProgress, [0.32, 0.42], [0, 1]);
 
-  const textExitY  = useTransform(exitP, [0, 1],    [0, -44]);
+  const textExitY  = useTransform(exitP, [0, 1],    [0, -60]);
   const textExitOp = useTransform(exitP, [0, 0.72], [1, 0]);
 
   return (
     <motion.div
       key="phase-3"
-      initial={enter} animate={center}
-      exit={exitUp} transition={tx}
+      initial={phaseEnter}
+      animate={phaseVisible}
+      exit={phaseExit}
+      transition={vmTransition}
       className="absolute inset-0"
     >
       {/* Text — left side. Video shows dashboard+AURA on right. */}
       <motion.div className="absolute flex flex-col gap-4" style={{ top: "7.5%", left: "6.5%", maxWidth: "44%", y: textExitY, opacity: textExitOp }}>
-        <h2
-          className="font-black"
-          style={{
-            color: "#C8941A",
-            fontSize: "clamp(34px, 3.05vw, 56px)",
-            lineHeight: 1.08,
-            letterSpacing: "-0.02em",
-            ...ts,
-          }}
-        >
-          Foi pensando nisso que criamos a
-          <br />
-          <span style={{ color: "#ffffff" }}>inteligência comercial</span>
-          <br />
-          do Vendas Mais.
+        <h2 className="font-black" style={{ ...vmTitleLineBase, color: "#ffffff", ...ts }}>
+          <span className="block" style={{ whiteSpace: "nowrap" }}>
+            Foi pensando nisso que
+          </span>
+          <span className="block" style={{ whiteSpace: "nowrap" }}>
+            criamos a inteligência comercial
+          </span>
+          <span className="block" style={{ whiteSpace: "nowrap" }}>
+            <VmTitleAccent>do Vendas Mais</VmTitleAccent>
+          </span>
         </h2>
         <p
           className="text-base font-medium leading-relaxed"
@@ -553,129 +589,71 @@ function PhaseSolution({ scrollYProgress }: { scrollYProgress: MotionValue<numbe
   );
 }
 
-// ─── PHASE 4: AUTHORITY — STACKED CARDS ───────────────────────────
-const authorityCards = [
-  {
-    title: "IA especializada",
-    body: "Sugestões comerciais pensadas para vendas, não respostas genéricas.",
-  },
-  {
-    title: "CRM estruturado",
-    body: "Leads, histórico e etapas do funil organizados em uma rotina clara.",
-  },
-  {
-    title: "Follow-up consistente",
-    body: "Acompanhamento no tempo certo para nenhuma oportunidade esfriar.",
-  },
-  {
-    title: "Pipeline visual",
-    body: "Visão simples do avanço de cada negociação até o fechamento.",
-  },
-  {
-    title: "Gestão em tempo real",
-    body: "Metas, performance e oportunidades sempre visíveis para a equipe.",
-  },
-  {
-    title: "Uso simples no celular",
-    body: "Interface pensada para vendedores agirem rápido, inclusive no mobile.",
-  },
-  {
-    title: "Academy e mentorias",
-    body: "Conteúdo prático para elevar abordagem, negociação e fechamento.",
-  },
-  {
-    title: "Processo escalável",
-    body: "Menos improviso e mais previsibilidade para vender todos os dias.",
-  },
+// ─── PHASE 4: AUTHORITY — SEQUENTIAL GRID ────────────────────────
+const authorityCards: Array<{ Icon: LucideIcon; title: string; body: string }> = [
+  { Icon: Bot,          title: "IA especializada",      body: "Sugestões comerciais pensadas para vendas, não respostas genéricas." },
+  { Icon: Database,     title: "CRM estruturado",       body: "Leads, histórico e etapas do funil organizados em uma rotina clara." },
+  { Icon: RefreshCw,    title: "Follow-up consistente", body: "Acompanhamento no tempo certo para nenhuma oportunidade esfriar." },
+  { Icon: KanbanSquare, title: "Pipeline visual",       body: "Visão simples do avanço de cada negociação até o fechamento." },
+  { Icon: BarChart3,    title: "Gestão em tempo real",  body: "Metas, performance e oportunidades sempre visíveis para a equipe." },
+  { Icon: Smartphone,   title: "Uso simples no celular",body: "Interface pensada para vendedores agirem rápido, inclusive no mobile." },
+  { Icon: GraduationCap,title: "Academy e mentorias",  body: "Conteúdo prático para elevar abordagem, negociação e fechamento." },
+  { Icon: Target,       title: "Processo escalável",    body: "Menos improviso e mais previsibilidade para vender todos os dias." },
 ];
 
-function AuthorityStackCard({
-  index,
-  total,
-  phaseProgress,
+function AuthorityCompactCard({
+  Icon,
   title,
   body,
+  index,
+  phaseProgress,
 }: {
-  index: number;
-  total: number;
-  phaseProgress: MotionValue<number>;
+  Icon: LucideIcon;
   title: string;
   body: string;
+  index: number;
+  phaseProgress: MotionValue<number>;
 }) {
-  const N = total;
-  const compactGap = 32;  // px entre cards empilhados
-  const cardH = 112;       // min-height do card
-  const readingPad = 20;   // gap entre a pilha e o card em leitura
+  const N = authorityCards.length;
+  const t0 = (index / N) * 0.72;
+  const t1 = t0 + 0.14;
 
-  // Cada card tem um "slot" de scroll para entrar e ser lido
-  const slotSize = 0.88 / N;                         // ~0.11 por card
-  const enterStart = index * slotSize;
-  const readingStart = enterStart + slotSize * 0.4;  // card chega na posição de leitura
-  const exitStart = index < N - 1 ? (index + 1) * slotSize : 0.88; // próximo card entra
-  const exitDone = Math.min(exitStart + slotSize * 0.4, 0.94);      // card está empilhado
-
-  // Posição de leitura: card 0 fica no topo; demais ficam logo abaixo da pilha atual
-  const compactY = index * compactGap;
-  const readingY = index === 0
-    ? 0
-    : (index - 1) * compactGap + cardH + readingPad;
-
-  // Card entra vindo de baixo → posição de leitura → sobe para a pilha
-  const y = useTransform(
-    phaseProgress,
-    [enterStart, readingStart, exitStart, exitDone, 1],
-    [readingY + 68, readingY, readingY, compactY, compactY],
-  );
-
-  const opacity = useTransform(
-    phaseProgress,
-    [Math.max(0, enterStart - 0.01), readingStart, 1],
-    [0, 1, 1],
-  );
-
-  const scale = useTransform(
-    phaseProgress,
-    [0, exitStart, exitDone, 1],
-    [1, 1, 1 - index * 0.010, 1 - index * 0.010],
-  );
-
-  const x = useTransform(
-    phaseProgress,
-    [0, exitStart, exitDone, 1],
-    [0, 0, index * 2, index * 2],
-  );
+  const opacity = useTransform(phaseProgress, [t0, t1], [0, 1]);
+  const y       = useTransform(phaseProgress, [t0, t1], [28, 0]);
 
   return (
     <motion.div
-      className="absolute left-0 right-0 rounded-2xl"
+      className="flex items-start gap-2.5 rounded-xl"
       style={{
-        y,
-        x,
-        scale,
         opacity,
-        zIndex: index + 1,
-        minHeight: 112,
-        padding: "22px 26px 22px 104px",
-        backgroundColor: "rgba(255,255,255,0.10)",
-        backdropFilter: "blur(18px)",
-        WebkitBackdropFilter: "blur(18px)",
-        border: "1px solid rgba(255,255,255,0.20)",
-        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.16), 0 18px 42px rgba(0,0,0,0.28)",
+        y,
+        padding: "10px 12px",
+        backgroundColor: "rgba(255,255,255,0.07)",
+        backdropFilter: "blur(14px)",
+        WebkitBackdropFilter: "blur(14px)",
+        border: "1px solid rgba(255,255,255,0.12)",
+        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), 0 8px 24px rgba(0,0,0,0.22)",
       }}
     >
       <span
-        aria-hidden="true"
-        className="absolute left-8 top-1/2 -translate-y-1/2 font-black italic leading-none"
-        style={{ color: "rgba(45,156,255,0.16)", fontSize: 78 }}
+        className="flex flex-shrink-0 items-center justify-center rounded-lg"
+        style={{
+          width: 30,
+          height: 30,
+          background: "rgba(45,156,255,0.12)",
+          border: "1px solid rgba(45,156,255,0.22)",
+        }}
       >
-        {index + 1}
+        <Icon size={14} strokeWidth={1.8} color="#2D9CFF" />
       </span>
-      <h3 className="text-xl font-black leading-tight" style={{ color: "#ffffff", ...ts }}>
-        {title}
-      </h3>
-      <p className="mt-2 text-sm font-medium leading-relaxed" style={{ color: "rgba(255,255,255,0.72)" }}>
-        {body}
-      </p>
+      <div>
+        <p className="text-[11px] font-black leading-tight" style={{ color: "#ffffff" }}>
+          {title}
+        </p>
+        <p className="mt-0.5 text-[10px] font-medium leading-snug" style={{ color: "rgba(255,255,255,0.58)" }}>
+          {body}
+        </p>
+      </div>
     </motion.div>
   );
 }
@@ -686,39 +664,37 @@ function PhaseAuthority({ scrollYProgress }: { scrollYProgress: MotionValue<numb
   return (
     <motion.div
       key="phase-4"
-      initial={enter} animate={center}
-      exit={exitUp} transition={tx}
+      initial={phaseEnter}
+      animate={phaseVisible}
+      exit={phaseExit}
+      transition={vmTransition}
       className="absolute inset-0"
     >
-      <div className="absolute" style={{ top: "7%", right: "6%", width: "44%" }}>
-        <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: "#2D9CFF", ...ts }}>
-          AUTORIDADE
-        </p>
-        <h2
-          className="font-black leading-tight"
-          style={{
-            color: "#ffffff",
-            fontSize: "clamp(36px, 3.2vw, 58px)",
-            letterSpacing: "-0.02em",
-            ...ts,
-          }}
-        >
-          Processo para <span style={{ color: "#C8941A" }}>vender mais.</span>
-        </h2>
+      <div className="absolute" style={{ top: "13%", right: "6%", width: "44%" }}>
+        <VmTitle as="h2" style={ts}>
+          Processo para
+          <br />
+          <VmTitleAccent>vender mais</VmTitleAccent>
+        </VmTitle>
         <p className="mt-3 max-w-xl text-sm font-medium leading-relaxed" style={{ color: "rgba(255,255,255,0.72)", ...ts }}>
-          IA, CRM e acompanhamento em uma rotina simples para tirar vendas do improviso.
+          IA, CRM e acompanhamento em uma rotina simples
+          <br />
+          para tirar vendas do improviso.
         </p>
       </div>
 
-      <div className="absolute" style={{ top: "34%", right: "6%", width: "44%", height: "62%" }}>
+      <div
+        className="absolute grid grid-cols-2 gap-2"
+        style={{ top: "38%", right: "6%", width: "44%" }}
+      >
         {authorityCards.map((card, index) => (
-          <AuthorityStackCard
+          <AuthorityCompactCard
             key={card.title}
-            index={index}
-            total={authorityCards.length}
-            phaseProgress={phaseProgress}
+            Icon={card.Icon}
             title={card.title}
             body={card.body}
+            index={index}
+            phaseProgress={phaseProgress}
           />
         ))}
       </div>
@@ -727,183 +703,279 @@ function PhaseAuthority({ scrollYProgress }: { scrollYProgress: MotionValue<numb
   );
 }
 
-const phase5Features: Array<{
-  Icon: LucideIcon;
-  before?: string;
-  highlight: string;
-  after?: string;
-  side: "left" | "right";
-  position: React.CSSProperties;
-}> = [
+/** Fase 5 — cards mais próximos do celular central (hero = 34% / 65,4%). */
+const phase5LeftAlignRight = "39.5%";
+const phase5RightAlignLeft = "59.8%";
+
+const phase5Features: Array<
+  ChipCard & {
+    side: "left" | "right";
+    top: string;
+  }
+> = [
   {
     Icon: Bot,
-    highlight: "IA especializada",
-    after: " para vendas, não uma IA genérica.",
+    title: "IA especializada",
+    body: "Para vendas, não uma IA genérica.",
     side: "left",
-    position: { top: "31%", left: "5.4%", width: "32%" },
+    top: "31%",
   },
   {
     Icon: Database,
-    highlight: "CRM estruturado",
-    after: " para a rotina comercial real.",
+    title: "CRM estruturado",
+    body: "Para a rotina comercial real.",
     side: "left",
-    position: { top: "43.5%", left: "8.4%", width: "29%" },
+    top: "43.5%",
   },
   {
     Icon: Link2,
-    before: "Processo de ",
-    highlight: "acompanhamento",
-    after: " integrado.",
+    title: "Acompanhamento integrado",
+    body: "Processo conectado na rotina comercial.",
     side: "left",
-    position: { top: "57%", left: "11.3%", width: "26%" },
+    top: "57%",
   },
   {
     Icon: BarChart3,
-    highlight: "Visão de gestão",
-    after: " para equipes, metas e performance.",
+    title: "Visão de gestão",
+    body: "Para equipes, metas e performance.",
     side: "right",
-    position: { top: "35%", right: "7.5%", width: "30%" },
+    top: "35%",
   },
   {
     Icon: Smartphone,
-    before: "Plataforma pensada para ",
-    highlight: "uso simples",
-    after: ", inclusive no celular.",
+    title: "Uso simples",
+    body: "Plataforma pensada para o celular e o dia a dia.",
     side: "right",
-    position: { top: "49.5%", right: "7.5%", width: "30%" },
+    top: "49.5%",
   },
 ];
-
-// ─── Phase 5 feature item ─────────────────────────────────────────
-function Phase5Feature({
-  Icon,
-  before,
-  highlight,
-  after,
-  side,
-}: {
-  Icon: LucideIcon;
-  before?: string;
-  highlight: string;
-  after?: string;
-  side: "left" | "right";
-}) {
-  const isLeft = side === "left";
-  return (
-    <div
-      className="flex items-center gap-5"
-      style={{ flexDirection: isLeft ? "row-reverse" : "row" }}
-    >
-      <span
-        className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full"
-        style={{
-          background: "rgba(74,61,43,0.72)",
-          border: "1px solid rgba(221,184,112,0.62)",
-          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.16), 0 0 24px rgba(200,148,26,0.24)",
-          backdropFilter: "blur(14px)",
-          WebkitBackdropFilter: "blur(14px)",
-        }}
-      >
-        <Icon size={24} strokeWidth={1.65} color="#D8B06B" />
-      </span>
-      <p
-        className="font-semibold leading-tight"
-        style={{
-          color: "rgba(255,255,255,0.86)",
-          textAlign: isLeft ? "right" : "left",
-          fontSize: "clamp(14px, 1.08vw, 20px)",
-          maxWidth: isLeft ? 360 : 390,
-          ...ts,
-        }}
-      >
-        {before}
-        <span style={{ color: "#9DBBDF" }}>{highlight}</span>
-        {after}
-      </p>
-    </div>
-  );
-}
 
 // ─── PHASE 5: TECHNOLOGY / AUTHORITY ─────────────────────────────
 // Cena 05: phone centered, features left + right
 function PhaseCTA() {
-  const e = tx.ease;
+  const e = easeOutExpo;
 
   return (
     <motion.div
       key="phase-5"
-      initial={enter} animate={center}
-      exit={exitUp} transition={tx}
+      initial={phaseEnter}
+      animate={phaseVisible}
+      exit={phaseExit}
+      transition={vmTransition}
       className="absolute inset-0"
       id="cta"
     >
-      {/* ── TOP: labels + headline + subtitle ── */}
+      {/* ── TOP: título + subtítulo ── */}
       <motion.div
-        className="absolute"
+        className="absolute text-center"
         style={{ top: "5.8%", left: "5%", right: "5%" }}
-        initial={{ opacity: 0, y: 18 }}
+        initial={{ opacity: 0, y: 36 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.05, ease: e }}
+        transition={{ duration: 0.65, delay: 0.05, ease: e }}
       >
-        <h2
-          className="font-black text-center"
+        <VmTitle
+          as="h2"
+          center
           style={{
-            color: "#ffffff",
-            fontSize: "clamp(30px, 2.75vw, 50px)",
-            lineHeight: 1.04,
-            letterSpacing: "-0.022em",
             maxWidth: "1120px",
             marginLeft: "auto",
             marginRight: "auto",
             ...ts,
           }}
         >
-          Tecnologia aplicada ao que realmente faz uma empresa{" "}
-          <span style={{ color: "#C8941A" }}>vender mais.</span>
-        </h2>
+          Tecnologia aplicada para <VmTitleAccent>vender mais</VmTitleAccent>
+        </VmTitle>
+        <p
+          className="mx-auto mt-4 font-medium"
+          style={{
+            maxWidth: "min(96vw, 1280px)",
+            color: "rgba(255,255,255,0.68)",
+            fontSize: "clamp(13px, 0.95vw, 16px)",
+            whiteSpace: "nowrap",
+            ...ts,
+          }}
+        >
+          Vender não é sorte. É processo, consistência e acompanhamento. O Vendas Mais transforma esses três pilares em sistema.
+        </p>
       </motion.div>
 
       {phase5Features.map((feature, i) => (
-          <motion.div
-            key={feature.highlight}
-            className="absolute"
-            style={feature.position}
-            initial={{ opacity: 0, x: feature.side === "left" ? -28 : 28 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.55, delay: 0.18 + i * 0.11, ease: e }}
-          >
-            <Phase5Feature
-              Icon={feature.Icon}
-              before={feature.before}
-              highlight={feature.highlight}
-              after={feature.after}
-              side={feature.side}
-            />
-          </motion.div>
+        <motion.div
+          key={feature.title}
+          className="absolute"
+          style={
+            feature.side === "left"
+              ? {
+                  top: feature.top,
+                  right: `calc(100% - ${phase5LeftAlignRight})`,
+                }
+              : {
+                  top: feature.top,
+                  left: phase5RightAlignLeft,
+                }
+          }
+          initial={{ opacity: 0, x: feature.side === "left" ? -48 : 48, y: 16 }}
+          animate={{ opacity: 1, x: 0, y: 0 }}
+          transition={{ duration: 0.62, delay: 0.18 + i * 0.11, ease: e }}
+        >
+          <FeatureCard Icon={feature.Icon} title={feature.title} body={feature.body} />
+        </motion.div>
       ))}
 
-      <motion.p
-        className="absolute left-[5%] right-[5%] text-center font-medium leading-relaxed"
-        style={{
-          bottom: "5.4%",
-          color: "rgba(255,255,255,0.68)",
-          fontSize: "clamp(13px, 0.95vw, 16px)",
-          ...ts,
-        }}
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.55, delay: 0.3, ease: e }}
+      <motion.div
+        className="absolute left-0 right-0 flex justify-center"
+        style={{ bottom: "4.8%" }}
+        initial={{ opacity: 0, y: 32, scale: 0.9 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.65, delay: 0.46, ease: e }}
       >
-        Vender não é sorte. É processo, consistência e acompanhamento.
-        <br />O Vendas Mais transforma esses três pilares em sistema.
-      </motion.p>
+        <VmCtaLink label="Agendar demonstração" className="cta-phone-glow" />
+      </motion.div>
     </motion.div>
+  );
+}
+
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const update = () => setIsMobile(window.innerWidth < 768);
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
+
+  return isMobile;
+}
+
+const mobilePhaseCopy: Record<Phase, {
+  tag: string;
+  title: string;
+  highlight?: string;
+  body: string;
+  bullets: string[];
+  cta?: string;
+}> = {
+  1: {
+    tag: "VENDAS MAIS",
+    title: "Mais vendas. Menos improviso",
+    body: "CRM, IA e automação comercial para organizar leads, acelerar respostas e transformar oportunidades em vendas reais.",
+    bullets: ["CRM inteligente", "IA comercial", "Follow-up automático"],
+    cta: "Quero vender mais",
+  },
+  2: {
+    tag: "Diagnóstico",
+    title: "Leads bons não podem esfriar",
+    highlight: "Resposta rápida",
+    body: "O Vendas Mais ajuda sua equipe a priorizar atendimento, follow-up e organização antes que a oportunidade se perca.",
+    bullets: ["Atendimento lento", "Falta de follow-up", "Leads sem contexto"],
+    cta: "Quero mais vendas",
+  },
+  3: {
+    tag: "Solução",
+    title: "Inteligência comercial aplicada à rotina",
+    body: "Uma plataforma completa para transformar processo comercial em execução simples no dia a dia.",
+    bullets: ["Processo claro", "Dados centralizados", "Ações sugeridas"],
+  },
+  4: {
+    tag: "Autoridade",
+    title: "Processo para vender mais",
+    body: "IA, CRM, pipeline visual e gestão em tempo real para reduzir improviso e ganhar previsibilidade.",
+    bullets: ["Pipeline visual", "Gestão em tempo real", "Academy e mentorias"],
+  },
+  5: {
+    tag: "Demonstração",
+    title: "Tecnologia aplicada para vender mais",
+    highlight: "Agende uma demonstração",
+    body: "Processo, consistência e acompanhamento transformados em sistema comercial.",
+    bullets: ["Uso simples no celular", "IA especializada", "CRM estruturado"],
+    cta: "Agendar demonstração",
+  },
+};
+
+function MobileVMExperience({ scrollYProgress }: VMExperienceProps) {
+  const activePhase = useActivePhase(scrollYProgress);
+  const copy = mobilePhaseCopy[activePhase];
+
+  return (
+    <div className="absolute inset-0 z-10 flex items-end px-5 pb-8 pt-8" aria-live="polite">
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={activePhase}
+          className="w-full rounded-2xl"
+          initial={{ opacity: 0, y: 44, scale: 0.96 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: -36, scale: 0.97, transition: { duration: 0.38, ease: easeInExpo } }}
+          transition={vmTransition}
+          style={{
+            padding: "22px 20px",
+            background:
+              "linear-gradient(180deg, rgba(5,10,20,0.42) 0%, rgba(5,10,20,0.82) 100%)",
+            border: "1px solid rgba(255,255,255,0.14)",
+            backdropFilter: "blur(18px)",
+            WebkitBackdropFilter: "blur(18px)",
+            boxShadow: "0 22px 58px rgba(0,0,0,0.38), inset 0 1px 0 rgba(255,255,255,0.10)",
+          }}
+        >
+          <p
+            className="text-[11px] font-black uppercase"
+            style={{ color: vmGold, letterSpacing: "0.22em", ...ts }}
+          >
+            {copy.tag}
+          </p>
+          {activePhase === 1 ? (
+            <VmTitle as="h1" className="mt-3" lines={["Mais vendas", "Menos improviso"]} style={ts} />
+          ) : (
+            <VmTitle as="h1" className="mt-3" style={ts}>
+              {copy.title}
+            </VmTitle>
+          )}
+          {copy.highlight && activePhase !== 1 && (
+            <p className="mt-2 font-black" style={{ ...vmTitleAccentStyle, fontSize: "clamp(22px, 5vw, 30px)", ...ts }}>
+              {copy.highlight}
+            </p>
+          )}
+          <p
+            className="mt-4 text-sm font-medium leading-relaxed"
+            style={{ color: "rgba(255,255,255,0.78)", ...ts }}
+          >
+            {copy.body}
+          </p>
+          <div className="mt-5 flex flex-wrap gap-2">
+            {copy.bullets.map((bullet) => (
+              <span
+                key={bullet}
+                className="rounded-full px-3 py-2 text-[10px] font-black uppercase"
+                style={{
+                  color: "rgba(255,255,255,0.88)",
+                  background: "rgba(255,255,255,0.09)",
+                  border: "1px solid rgba(217,154,30,0.30)",
+                  letterSpacing: "0.06em",
+                }}
+              >
+                {bullet}
+              </span>
+            ))}
+          </div>
+          {copy.cta && (
+            <div className="mt-6 flex justify-center">
+              <VmCtaLink label={copy.cta} className="max-w-full" />
+            </div>
+          )}
+        </motion.div>
+      </AnimatePresence>
+    </div>
   );
 }
 
 // ─── ORCHESTRATOR ─────────────────────────────────────────────────
 export default function VMExperience({ scrollYProgress }: VMExperienceProps) {
   const activePhase = useActivePhase(scrollYProgress);
+  const isMobile = useIsMobile();
+
+  if (isMobile) {
+    return <MobileVMExperience scrollYProgress={scrollYProgress} />;
+  }
 
   return (
     <div

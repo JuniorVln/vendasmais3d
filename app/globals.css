@@ -4,8 +4,9 @@
   --color-vm-blue:       #0074BD;
   --color-vm-blue-dark:  #005092;
   --color-vm-deep:       #003372;
-  --color-vm-gold:       #C8941A;
-  --color-vm-gold-light: #E8A820;
+  --color-vm-gold:       #FFD245;
+  --color-vm-gold-light: #FFE57A;
+  --color-vm-title-accent: #2D9CFF;
   --color-vm-black:      #050A14;
   --color-vm-surface:    rgba(0, 80, 146, 0.12);
   --font-sans: var(--font-montserrat), 'Montserrat', sans-serif;
@@ -15,8 +16,6 @@
 *::before,
 *::after {
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
 }
 
 html {
@@ -24,6 +23,7 @@ html {
 }
 
 body {
+  margin: 0;
   background-color: #050A14;
   color: #ffffff;
   font-family: var(--font-sans);
@@ -36,11 +36,31 @@ body {
   color: #ffffff;
 }
 
-@keyframes marquee {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+@keyframes ctaPhoneGlow {
+  0%, 100% {
+    box-shadow:
+      0 0 34px rgba(255,210,69,0.36),
+      0 0 0 1px rgba(255,210,69,0.40),
+      inset 0 1px 0 rgba(255,255,255,0.20);
+  }
+  50% {
+    box-shadow:
+      0 0 54px rgba(255,210,69,0.56),
+      0 0 0 8px rgba(255,210,69,0.08),
+      inset 0 1px 0 rgba(255,255,255,0.24);
+  }
 }
 
-.animate-marquee {
-  animation: marquee 30s linear infinite;
+.cta-phone-glow {
+  animation: ctaPhoneGlow 2.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .cta-phone-glow {
+    animation: none;
+  }
 }

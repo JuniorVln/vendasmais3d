@@ -1,7 +1,7 @@
 // Update TOTAL_FRAMES after running: npm run extract-frames
 export const TOTAL_FRAMES = 575;
 export const FRAMES_PATH = "/frames";
-// Run: npm run encode-scroll to generate this file (keyframe every frame = instant seeking)
+// Use the checked-in video by default. Run npm run encode-scroll if a keyframe-per-frame file is needed later.
 export const VIDEO_SCROLL_PATH = "/videos/vm-scroll.mp4";
 // Original video — fallback when vm-scroll.mp4 hasn't been encoded yet
 export const VIDEO_FALLBACK_PATH = "/videos/vm-sequence.mp4";
@@ -20,22 +20,11 @@ export interface Feature {
 
 export const heroData = {
   tag: "PLATAFORMA COMPLETA",
-  headline: "Mais vendas.",
-  headlineHighlight: "Menos improviso.",
+  headline: "Mais vendas",
+  headlineHighlight: "Menos improviso",
   subline:
     "CRM, IA e automação comercial para organizar leads, acelerar respostas e transformar oportunidades em vendas reais.",
   cta: "Quero fazer parte →",
-  marquee: [
-    "INTEGRAÇÃO CRM",
-    "PONTUAÇÃO DE LEADS",
-    "ROTEIROS DE VENDAS",
-    "PAINEL DE PERFORMANCE",
-    "AUTOMAÇÃO DE EMAIL",
-    "ACADEMIA VENDAS MAIS",
-    "INTELIGÊNCIA DE MERCADO",
-    "CHATBOT IA",
-    "TÉCNICAS DE NEGOCIAÇÃO",
-  ],
 };
 
 export const painPointsData: PainPoint[] = [
@@ -63,26 +52,12 @@ export const painPointsData: PainPoint[] = [
     body: "Abordagem genérica reduz conexão e conversão.",
     bold: "Qualifique com precisão.",
   },
-  {
-    icon: "👥",
-    title: "EQUIPE SOBRECARREGADA",
-    body: "Vendedores gastam tempo organizando em vez de vender.",
-    bold: "Libere-os.",
-  },
-];
-
-export const painPointsMarquee = [
-  "PIPELINE VISUALIZATION",
-  "LEAD SCORING AI",
-  "INTEGRATIONS",
-  "DATA-DRIVEN INSIGHTS",
-  "SALES PERFORMANCE TRACKER",
 ];
 
 export const solutionData = {
   headline: "Foi pensando nisso que criamos a ",
   headlineHighlight: "inteligência comercial",
-  headlineSuffix: " do Vendas Mais.",
+  headlineSuffix: " do Vendas Mais",
   sub: "Uma plataforma completa que une alta tecnologia com um processo comercial eficiente para transformar o dia a dia das suas vendas.",
   aura: {
     headerLabel: "AURA — Inteligência Comercial",
@@ -102,7 +77,7 @@ export const solutionData = {
 export const authorityData = {
   tag: "AUTORIDADE",
   headline: "Tecnologia aplicada ao que realmente faz uma empresa ",
-  headlineHighlight: "vender mais.",
+  headlineHighlight: "vender mais",
   sub: "Vender não é sorte. É processo, consistência e acompanhamento. O Vendas Mais transforma esses três pilares em sistema.",
   features: [
     { icon: "🤖", text: "IA especializada para vendas, não uma IA genérica." },
@@ -136,33 +111,33 @@ export const socialProofData = {
 };
 
 export const plansData = {
-  heading: "Escolha seu plano",
-  sub: "Sem contratos longos. Comece hoje.",
+  heading: "Planos para cada momento comercial",
+  sub: "Compare os caminhos e fale com um especialista para montar a melhor configuração.",
   plans: [
     {
       name: "STARTER",
-      price: "// TODO: update pricing",
-      features: ["Acesso à plataforma", "AURA IA básica", "CRM integrado"],
-      cta: "Começar agora",
+      price: "Para começar com processo",
+      features: ["Acesso à plataforma", "CRM integrado", "Rotina básica de follow-up"],
+      cta: "Consultar plano",
       highlight: false,
     },
     {
       name: "PRO",
-      price: "// TODO: update pricing",
+      price: "Para acelerar vendas com IA",
       features: [
         "Tudo do Starter",
-        "AURA IA avançada",
-        "Workflows",
+        "IA comercial avançada",
+        "Workflows de acompanhamento",
         "VM+ Academy",
         "Suporte prioritário",
       ],
-      cta: "Quero o Pro",
+      cta: "Conhecer o Pro",
       highlight: true,
-      badge: "MAIS POPULAR",
+      badge: "MAIS INDICADO",
     },
     {
       name: "ENTERPRISE",
-      price: "Sob consulta",
+      price: "Para operações com múltiplas equipes",
       features: [
         "Tudo do Pro",
         "Multi-equipe",
