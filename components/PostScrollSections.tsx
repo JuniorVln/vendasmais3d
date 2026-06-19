@@ -1,13 +1,17 @@
 "use client";
 
 import {
-  ArrowRight,
+  CalendarClock,
   Mail,
   Phone,
+  PlayCircle,
+  ShoppingCart,
+  X,
 } from "lucide-react";
-import { motion } from "framer-motion";
+import { useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
-import VmTitle from "@/components/VmTitle";
+import VmTitle, { VmTitleAccent } from "@/components/VmTitle";
 import {
   inViewFadeUp,
   inViewFromLeft,
@@ -16,51 +20,50 @@ import {
 } from "@/lib/motionVariants";
 import { VM_TITLE_ACCENT, VM_TITLE_ON_LIGHT } from "@/lib/vmTitleStyles";
 import VmLogo from "./VmLogo";
-import PlansSection from "./PlansSection";
 
 const beforeCopy = [
   {
     title: "Leads espalhados",
-    body: "Contatos ficam perdidos entre planilhas, WhatsApp e anotações, sem uma visão clara do que precisa avançar.",
+    body: "Informações perdidas entre WhatsApp, planilhas e anotações.",
   },
   {
     title: "Follow-up esquecido",
-    body: "Oportunidades esfriam porque não existe uma rotina simples para lembrar, priorizar e retomar conversas.",
+    body: "Oportunidades esfriam por falta de acompanhamento.",
   },
   {
     title: "Atendimento lento",
-    body: "A equipe demora para responder e o lead acaba fechando com quem chegou primeiro.",
+    body: "Leads aguardam resposta e fecham com concorrentes.",
   },
   {
-    title: "Falta de visão do funil",
-    body: "Gestores não enxergam gargalos, próximos passos e previsibilidade de fechamento.",
+    title: "Falta de previsibilidade",
+    body: "Sem clareza sobre resultados, gargalos e próximos passos.",
   },
   {
-    title: "Vendedor sobrecarregado",
-    body: "Tempo demais em tarefas manuais e pouco foco no que realmente gera venda.",
+    title: "Equipe sobrecarregada",
+    body: "Muito trabalho operacional e pouco foco em vendas.",
   },
 ];
 
 const afterCopy = [
   {
     title: "Leads centralizados",
-    body: "Histórico, dados e oportunidades ficam organizados em uma rotina comercial única.",
+    body: "Todos os contatos, históricos e oportunidades em um só lugar.",
   },
   {
-    title: "Follow-up automatizado",
-    body: "Lembretes e ações ajudam a manter cada oportunidade ativa no momento certo.",
+    title: "Follow-up inteligente",
+    body: "Acompanhamentos automáticos para nenhuma oportunidade esfriar.",
   },
   {
-    title: "IA apoiando a abordagem",
-    body: "Sugestões comerciais ajudam o time a responder melhor e conduzir cada lead com mais contexto.",
+    title: "IA Comercial Especializada",
+    body: "Sugestões estratégicas e abordagens personalizadas para cada lead.",
   },
   {
-    title: "Dashboard de gestão",
-    body: "Metas, performance e oportunidades aparecem em uma visão objetiva para decisão rápida.",
+    title: "Gestão em tempo real",
+    body: "Metas, performance e oportunidades monitoradas em um dashboard completo.",
   },
   {
-    title: "Mais foco em fechamento",
-    body: "Menos improviso operacional e mais energia aplicada nas conversas com chance real de venda.",
+    title: "Mais vendas, menos esforço",
+    body: "Processos organizados para sua equipe focar no que realmente importa: vender.",
   },
 ];
 
@@ -86,14 +89,14 @@ function BeforeAfterCenterPhone() {
       `}</style>
       <div className="flex h-full w-full items-center justify-center overflow-visible">
         <Image
-          src="/smartphone-ia-vendas-mais.png"
+          src="/smartphone-ia-vendas-mais-v2-gpt.png"
           alt="Vendas Mais — inteligência comercial no celular"
           width={1024}
           height={1536}
           className="before-after-phone-pulse block h-full w-auto max-h-[min(72vh,700px)] object-contain object-center"
           style={{
             animation: "beforeAfterPhonePulse 2.8s ease-in-out infinite",
-            transform: "scale(1.22)",
+            transform: "scale(1.12)",
             transformOrigin: "center center",
           }}
           priority={false}
@@ -145,7 +148,7 @@ function BeforeAfterSection() {
           boxShadow: "0 40px 120px rgba(0,0,0,0.35)",
         }}
       >
-        <motion.div {...inViewFadeUp} style={{ marginBottom: "clamp(48px, 6vw, 96px)" }}>
+        <motion.div {...inViewFadeUp} style={{ marginBottom: "clamp(40px, 5vw, 72px)" }}>
           <VmTitle
             as="h2"
             id="before-after-heading"
@@ -157,8 +160,21 @@ function BeforeAfterSection() {
               marginLeft: "auto",
               marginRight: "auto",
             }}
-            lines={["Do improviso para uma", "operação comercial previsível"]}
+            lines={["Do caos comercial ao", "controle total das vendas"]}
           />
+          <p
+            className="mx-auto mt-5 text-center font-medium"
+            style={{
+              maxWidth: 720,
+              fontSize: "clamp(14px, 1.05vw, 17px)",
+              lineHeight: 1.5,
+              color: "rgba(99,122,155,0.85)",
+            }}
+          >
+            Veja como a IA do Vendas Mais transforma operações comerciais
+            desorganizadas em processos previsíveis, inteligentes e focados em
+            conversão.
+          </p>
         </motion.div>
 
         <div className="mx-auto grid w-full max-w-[1180px] items-stretch justify-center gap-12 overflow-visible lg:grid-cols-[380px_minmax(200px,320px)_380px]">
@@ -222,12 +238,215 @@ function BeforeAfterSection() {
             ))}
           </motion.div>
         </div>
+
+        <motion.div
+          className="mt-14 flex justify-center"
+          {...inViewFadeUp}
+          transition={{ ...inViewFadeUp.transition, delay: 0.1 }}
+        >
+          <a
+            href="#contato"
+            className="inline-flex items-center justify-center rounded-full font-black uppercase tracking-[0.12em] transition-all duration-300 hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+            style={{
+              backgroundColor: "#FFD245",
+              color: "#050A14",
+              fontSize: 14,
+              padding: "16px 44px",
+              boxShadow:
+                "0 0 36px rgba(255,210,69,0.40), 0 0 0 1px rgba(255,210,69,0.34), inset 0 1px 0 rgba(255,255,255,0.18)",
+            }}
+            onMouseEnter={(e) =>
+              ((e.currentTarget as HTMLAnchorElement).style.backgroundColor = "#FFE57A")
+            }
+            onMouseLeave={(e) =>
+              ((e.currentTarget as HTMLAnchorElement).style.backgroundColor = "#FFD245")
+            }
+          >
+            Quero sair do caos
+          </a>
+        </motion.div>
       </div>
     </section>
   );
 }
 
+// ─── Popup de conversão (Agendar / Comprar) ─────────────────────
+const WHATSAPP_NUMBER = "5551991387792";
+const WHATSAPP_BASE_MSG =
+  "Olá, gostaria de agendar uma apresentação do sistema IA do Vendas Mais!";
+// TODO: substituir pelo link de compra quando o cliente enviar.
+const BUY_LINK_PLACEHOLDER = "";
+
+function LeadModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const [form, setForm] = useState({ nome: "", telefone: "", email: "" });
+
+  function update(field: keyof typeof form, value: string) {
+    setForm((prev) => ({ ...prev, [field]: value }));
+  }
+
+  function handleAgendar() {
+    // Simulação de gravação do lead (integrar com backend/CRM futuramente).
+    console.log("[lead] agendar", form);
+
+    const extras = [
+      form.nome && `Nome: ${form.nome}`,
+      form.telefone && `Telefone: ${form.telefone}`,
+      form.email && `E-mail: ${form.email}`,
+    ]
+      .filter(Boolean)
+      .join("\n");
+    const msg = extras ? `${WHATSAPP_BASE_MSG}\n\n${extras}` : WHATSAPP_BASE_MSG;
+    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
+    window.open(url, "_blank", "noopener,noreferrer");
+    onClose();
+  }
+
+  function handleComprar() {
+    // Simulação de gravação do lead (integrar com backend/CRM futuramente).
+    console.log("[lead] comprar", form);
+
+    if (BUY_LINK_PLACEHOLDER) {
+      window.open(BUY_LINK_PLACEHOLDER, "_blank", "noopener,noreferrer");
+      onClose();
+    } else {
+      // Placeholder até o link de compra ser entregue.
+      alert("O link de compra estará disponível em breve.");
+    }
+  }
+
+  const inputStyle: React.CSSProperties = {
+    width: "100%",
+    padding: "13px 16px",
+    borderRadius: 12,
+    background: "rgba(255,255,255,0.06)",
+    border: "1px solid rgba(255,255,255,0.14)",
+    color: "#ffffff",
+    fontSize: 15,
+    outline: "none",
+  };
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: "rgba(2,5,12,0.78)", backdropFilter: "blur(6px)" }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={onClose}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="lead-modal-title"
+        >
+          <motion.div
+            className="relative w-full overflow-hidden rounded-3xl"
+            style={{
+              maxWidth: 460,
+              background:
+                "linear-gradient(135deg, rgba(8,28,52,0.98) 0%, rgba(5,10,20,0.99) 60%, rgba(32,22,8,0.96) 100%)",
+              border: "1px solid rgba(217,154,30,0.32)",
+              boxShadow: "0 40px 100px rgba(0,0,0,0.6)",
+              padding: "clamp(28px, 5vw, 40px)",
+            }}
+            initial={{ opacity: 0, y: 32, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 24, scale: 0.97 }}
+            transition={{ duration: 0.28 }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Fechar"
+              className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-white/10"
+              style={{ color: "rgba(255,255,255,0.6)" }}
+            >
+              <X size={20} />
+            </button>
+
+            <h3
+              id="lead-modal-title"
+              className="font-black"
+              style={{ color: "#ffffff", fontSize: "clamp(20px, 2.4vw, 26px)" }}
+            >
+              Vamos começar?
+            </h3>
+            <p
+              className="mt-2 font-medium"
+              style={{ color: "rgba(255,255,255,0.62)", fontSize: 14, lineHeight: 1.5 }}
+            >
+              Preencha seus dados e escolha como deseja seguir.
+            </p>
+
+            <div className="mt-6 flex flex-col gap-3">
+              <input
+                type="text"
+                placeholder="Nome"
+                value={form.nome}
+                onChange={(e) => update("nome", e.target.value)}
+                style={inputStyle}
+                aria-label="Nome"
+              />
+              <input
+                type="tel"
+                placeholder="Telefone"
+                value={form.telefone}
+                onChange={(e) => update("telefone", e.target.value)}
+                style={inputStyle}
+                aria-label="Telefone"
+              />
+              <input
+                type="email"
+                placeholder="E-mail"
+                value={form.email}
+                onChange={(e) => update("email", e.target.value)}
+                style={inputStyle}
+                aria-label="E-mail"
+              />
+            </div>
+
+            <div className="mt-6 flex flex-col gap-3">
+              <button
+                type="button"
+                onClick={handleAgendar}
+                className="inline-flex items-center justify-center gap-2 rounded-full font-black uppercase tracking-[0.1em] transition-all duration-300 hover:scale-[1.03]"
+                style={{
+                  backgroundColor: "#FFD245",
+                  color: "#050A14",
+                  fontSize: 13,
+                  padding: "15px 28px",
+                  boxShadow: "0 0 32px rgba(255,210,69,0.36), inset 0 1px 0 rgba(255,255,255,0.18)",
+                }}
+              >
+                <CalendarClock size={17} strokeWidth={2.2} />
+                Agendar horário
+              </button>
+              <button
+                type="button"
+                onClick={handleComprar}
+                className="inline-flex items-center justify-center gap-2 rounded-full font-black uppercase tracking-[0.1em] transition-all duration-300 hover:scale-[1.03]"
+                style={{
+                  background: "transparent",
+                  color: "#2D9CFF",
+                  fontSize: 13,
+                  padding: "15px 28px",
+                  border: "1px solid rgba(45,156,255,0.5)",
+                }}
+              >
+                <ShoppingCart size={17} strokeWidth={2.2} />
+                Comprar agora
+              </button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
 function FinalCTASection() {
+  const [leadModalOpen, setLeadModalOpen] = useState(false);
   return (
     <section
       id="contato"
@@ -303,7 +522,7 @@ function FinalCTASection() {
               <VmTitle
                 as="h2"
                 id="final-cta-heading"
-                lines={["Aumente sua conversão", "Reduza seus custos"]}
+                lines={["Venda com previsibilidade", "Cresça com inteligência"]}
                 style={{ maxWidth: 480 }}
               />
 
@@ -316,35 +535,53 @@ function FinalCTASection() {
                   marginTop: 28,
                 }}
               >
-                Agende uma demonstração e veja como o Vendas Mais pode
-                organizar sua pré-venda, automatizar acompanhamentos e ajudar
-                sua equipe a vender mais.
+                Agende uma demonstração e descubra onde sua empresa está
+                perdendo oportunidades — e como transformar isso em mais vendas.
               </p>
 
-              <a
-                href="mailto:contato@iavendasmais.com.br?subject=Agendar%20demonstra%C3%A7%C3%A3o%20Vendas%20Mais"
-                className="inline-flex items-center justify-center gap-3 rounded-full font-black uppercase tracking-[0.14em] transition-all duration-300 hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-                style={{
-                  marginTop: 36,
-                  backgroundColor: "#FFD245",
-                  color: "#050A14",
-                  fontSize: 13,
-                  padding: "17px 52px",
-                  boxShadow:
-                    "0 0 40px rgba(255,210,69,0.40), 0 0 0 1px rgba(255,210,69,0.34), inset 0 1px 0 rgba(255,255,255,0.18)",
-                }}
-                onMouseEnter={(e) =>
-                  ((e.currentTarget as HTMLAnchorElement).style.backgroundColor =
-                    "#FFE57A")
-                }
-                onMouseLeave={(e) =>
-                  ((e.currentTarget as HTMLAnchorElement).style.backgroundColor =
-                    "#FFD245")
-                }
-              >
-                Agendar demonstração
-                <ArrowRight size={16} strokeWidth={2.5} />
-              </a>
+              <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
+                <button
+                  type="button"
+                  onClick={() => setLeadModalOpen(true)}
+                  className="inline-flex items-center justify-center rounded-full font-black uppercase tracking-[0.14em] transition-all duration-300 hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                  style={{
+                    backgroundColor: "#FFD245",
+                    color: "#050A14",
+                    fontSize: 13,
+                    padding: "17px 44px",
+                    boxShadow:
+                      "0 0 40px rgba(255,210,69,0.40), 0 0 0 1px rgba(255,210,69,0.34), inset 0 1px 0 rgba(255,255,255,0.18)",
+                  }}
+                  onMouseEnter={(e) =>
+                    ((e.currentTarget as HTMLButtonElement).style.backgroundColor = "#FFE57A")
+                  }
+                  onMouseLeave={(e) =>
+                    ((e.currentTarget as HTMLButtonElement).style.backgroundColor = "#FFD245")
+                  }
+                >
+                  Agendar demonstração
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLeadModalOpen(true)}
+                  className="inline-flex items-center justify-center rounded-full font-black uppercase tracking-[0.14em] transition-all duration-300 hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                  style={{
+                    background: "transparent",
+                    color: "#ffffff",
+                    fontSize: 13,
+                    padding: "17px 44px",
+                    border: "1px solid rgba(255,255,255,0.28)",
+                  }}
+                  onMouseEnter={(e) =>
+                    ((e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(45,156,255,0.6)")
+                  }
+                  onMouseLeave={(e) =>
+                    ((e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.28)")
+                  }
+                >
+                  Ver planos
+                </button>
+              </div>
             </div>
 
             {/* Right: contacts */}
@@ -413,6 +650,100 @@ function FinalCTASection() {
           </p>
         </div>
       </div>
+
+      <LeadModal open={leadModalOpen} onClose={() => setLeadModalOpen(false)} />
+    </section>
+  );
+}
+
+function DoubtVideoSection() {
+  return (
+    <section
+      className="relative w-full overflow-hidden"
+      style={{
+        background:
+          "linear-gradient(180deg, #050A14 0%, #040811 50%, #050A14 100%)",
+        backgroundImage: dotGrid,
+        backgroundSize: "30px 30px",
+        padding: "clamp(72px, 9vw, 120px) 24px",
+      }}
+      aria-labelledby="doubt-video-heading"
+    >
+      <div className="mx-auto w-full" style={{ maxWidth: 920 }}>
+        <motion.div {...inViewFadeUp} className="text-center">
+          <VmTitle as="h2" id="doubt-video-heading" center>
+            Ainda está em <VmTitleAccent>dúvida?</VmTitleAccent>
+          </VmTitle>
+          <p
+            className="mx-auto mt-5 font-medium"
+            style={{
+              maxWidth: 740,
+              fontSize: "clamp(14px, 1.05vw, 17px)",
+              lineHeight: 1.55,
+              color: "rgba(255,255,255,0.68)",
+            }}
+          >
+            Veja por que a Inteligência Comercial está se tornando indispensável
+            para empresas que desejam crescer. Uma explicação clara e objetiva
+            sobre como a IA do Vendas Mais pode transformar sua operação
+            comercial.
+          </p>
+        </motion.div>
+
+        {/* Vídeo do Everaldo — placeholder até a gravação ser entregue */}
+        <motion.div
+          {...inViewScale}
+          transition={{ ...inViewScale.transition, delay: 0.1 }}
+          className="relative mx-auto mt-12 flex items-center justify-center overflow-hidden rounded-3xl"
+          style={{
+            aspectRatio: "16 / 9",
+            width: "100%",
+            background:
+              "linear-gradient(135deg, rgba(8,28,52,0.92) 0%, rgba(5,10,20,0.96) 60%, rgba(32,22,8,0.9) 100%)",
+            border: "1px solid rgba(217,154,30,0.32)",
+            boxShadow:
+              "0 40px 100px rgba(0,0,0,0.48), inset 0 1px 0 rgba(255,255,255,0.08)",
+          }}
+        >
+          {/* TODO: substituir por <video>/embed quando o vídeo do Everaldo for entregue */}
+          <div className="flex flex-col items-center gap-4 text-center">
+            <PlayCircle size={72} strokeWidth={1.3} color="#FFD245" />
+            <p
+              className="text-sm font-bold uppercase tracking-[0.18em]"
+              style={{ color: "rgba(255,255,255,0.62)" }}
+            >
+              Vídeo em breve
+            </p>
+          </div>
+        </motion.div>
+
+        <motion.div
+          className="mt-12 flex justify-center"
+          {...inViewFadeUp}
+          transition={{ ...inViewFadeUp.transition, delay: 0.18 }}
+        >
+          <a
+            href="#contato"
+            className="inline-flex items-center justify-center rounded-full font-black uppercase tracking-[0.12em] transition-all duration-300 hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+            style={{
+              backgroundColor: "#FFD245",
+              color: "#050A14",
+              fontSize: 14,
+              padding: "16px 44px",
+              boxShadow:
+                "0 0 36px rgba(255,210,69,0.40), 0 0 0 1px rgba(255,210,69,0.34), inset 0 1px 0 rgba(255,255,255,0.18)",
+            }}
+            onMouseEnter={(e) =>
+              ((e.currentTarget as HTMLAnchorElement).style.backgroundColor = "#FFE57A")
+            }
+            onMouseLeave={(e) =>
+              ((e.currentTarget as HTMLAnchorElement).style.backgroundColor = "#FFD245")
+            }
+          >
+            Quero vender mais todos os meses
+          </a>
+        </motion.div>
+      </div>
     </section>
   );
 }
@@ -421,7 +752,7 @@ export default function PostScrollSections() {
   return (
     <>
       <BeforeAfterSection />
-      <PlansSection />
+      <DoubtVideoSection />
       <FinalCTASection />
     </>
   );

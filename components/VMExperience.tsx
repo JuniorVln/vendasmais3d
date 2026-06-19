@@ -7,15 +7,20 @@ import {
   Bot,
   CalendarDays,
   Clock3,
+  Briefcase,
+  Camera,
   Database,
   FolderOpen,
-  GraduationCap,
+  Globe,
   KanbanSquare,
-  Link2,
+  Mail,
+  Megaphone,
   PhoneCall,
   RefreshCw,
-  Smartphone,
+  Search,
+  Share2,
   Target,
+  Users,
   type LucideIcon,
 } from "lucide-react";
 import VmTitle, { VmTitleAccent } from "@/components/VmTitle";
@@ -72,21 +77,31 @@ function VmCtaLink({
   label,
   href = "#contato",
   className = "",
+  big = false,
+  pulse = false,
 }: {
   label: string;
   href?: string;
   className?: string;
+  /** Versão maior do botão (págs. 1 e 5). */
+  big?: boolean;
+  /** Efeito pulsante contínuo (pág. 1). */
+  pulse?: boolean;
 }) {
+  const style: React.CSSProperties = big
+    ? { ...vmCtaButtonStyle, fontSize: 14, padding: "14px 36px", letterSpacing: "0.05em" }
+    : vmCtaButtonStyle;
+
   return (
     <a
       href={href}
-      className={`pointer-events-auto rounded-full font-semibold tracking-wide transition-all duration-300 hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${className}`}
-      style={vmCtaButtonStyle}
+      className={`pointer-events-auto rounded-full font-semibold tracking-wide transition-all duration-300 hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${pulse ? "cta-pulse" : ""} ${className}`}
+      style={style}
       onMouseEnter={(e) => ((e.currentTarget as HTMLAnchorElement).style.backgroundColor = vmGoldLight)}
       onMouseLeave={(e) => ((e.currentTarget as HTMLAnchorElement).style.backgroundColor = vmGold)}
       aria-label={label}
     >
-      {label} ↗
+      {label}
     </a>
   );
 }
@@ -103,12 +118,16 @@ function BottomCTA({
   compact = false,
   placement = "bottom",
   href = "#contato",
+  big = false,
+  pulse = false,
 }: {
   label: string;
   note?: string;
   compact?: boolean;
   placement?: "bottom" | "heroTopRight" | "painCardsRight";
   href?: string;
+  big?: boolean;
+  pulse?: boolean;
 }) {
   const isHeroTopRight = placement === "heroTopRight";
   const isPainCardsRight = placement === "painCardsRight";
@@ -126,7 +145,7 @@ function BottomCTA({
           : { bottom: compact ? 14 : 24, left: 0, right: 0 }
       }
     >
-      <VmCtaLink label={label} href={href} />
+      <VmCtaLink label={label} href={href} big={big} pulse={pulse} />
       {note && (
         <p className="text-xs font-medium pointer-events-none" style={{ color: "rgba(255,255,255,0.35)", ...ts }}>
           {note}
@@ -148,25 +167,26 @@ function FeatureCard({ Icon, title, body, badge }: ChipCard) {
     <div
       className="rounded-xl flex flex-col"
       style={{
-        width: "clamp(220px, 20vw, 270px)",
-        padding: "10px 13px",
-        gap: 7,
+        width: "clamp(240px, 22vw, 300px)",
+        padding: "13px 16px",
+        gap: 8,
         backdropFilter: "blur(16px)",
         WebkitBackdropFilter: "blur(16px)",
-        backgroundColor: "rgba(255,255,255,0.105)",
-        border: "1px solid rgba(232,198,126,0.36)",
+        // Fumê com borda amarela (mesmo padrão dos cards da Fase 2)
+        backgroundColor: "rgba(5,10,20,0.68)",
+        border: "1px solid rgba(217,154,30,0.58)",
         boxShadow:
-          "inset 0 1px 0 rgba(255,255,255,0.12), 0 10px 30px rgba(0,0,0,0.36), 0 0 18px rgba(220,168,50,0.05)",
+          "inset 0 1px 0 rgba(255,255,255,0.08), 0 12px 32px rgba(0,0,0,0.40), 0 0 18px rgba(220,168,50,0.06)",
       }}
     >
       <div className="flex items-center gap-2">
-        <Icon size={13} strokeWidth={2} color="#2D9CFF" className="flex-shrink-0" />
-        <span className="text-[10px] font-bold uppercase tracking-wide" style={{ color: "#ffffff" }}>
+        <Icon size={15} strokeWidth={2} color="#2D9CFF" className="flex-shrink-0" />
+        <span className="text-[12px] font-bold uppercase tracking-wide" style={{ color: "#ffffff" }}>
           {title}
         </span>
         {badge && (
           <span
-            className="text-[7px] font-black uppercase tracking-wide px-1.5 py-0.5 rounded-full"
+            className="text-[8px] font-black uppercase tracking-wide px-1.5 py-0.5 rounded-full"
             style={{ backgroundColor: vmGold, color: "#050A14" }}
           >
             {badge}
@@ -174,12 +194,12 @@ function FeatureCard({ Icon, title, body, badge }: ChipCard) {
         )}
       </div>
       <p
-        className="text-[9px] font-medium"
+        className="text-[11px] font-medium"
         style={{
-          color: "rgba(255,255,255,0.82)",
-          lineHeight: 1.25,
+          color: "rgba(255,255,255,0.85)",
+          lineHeight: 1.3,
           display: "-webkit-box",
-          WebkitLineClamp: 2,
+          WebkitLineClamp: 3,
           WebkitBoxOrient: "vertical",
           overflow: "hidden",
         }}
@@ -192,14 +212,22 @@ function FeatureCard({ Icon, title, body, badge }: ChipCard) {
 
 // ─── PHASE 1: HERO ────────────────────────────────────────────────
 // Cena 01: phone centered-right, dark space bg
-const heroCardsGridTop = "39.5%";
-const heroCardsGridBottom = "13%"; // base dos cards alinhada à parte inferior do celular
-const heroLeftAlignRight = "34%"; // borda direita dos cards (linha vermelha)
-const heroRightAlignLeft = "65.4%"; // borda esquerda dos cards (Pipeline Visual)
+const heroCardsGridTop = "33%"; // desce a grade p/ o 1º card esquerdo não tocar o subtítulo
+const heroCardsGridBottom = "4%"; // span mantido (~63%) → mesmo respiro vertical entre cards
+const heroLeftAlignRight = "30%"; // borda direita dos cards — afastada do celular
+const heroRightAlignLeft = "70%"; // borda esquerda dos cards — afastada do celular
 
 type HeroCard = ChipCard & { opacity?: number };
 
+// Ordem do cliente (doc): IA Especializada, CRM Inteligente, Resposta rápida,
+// Follow-up, Agenda, Pipeline Visual, Dashboard.
 const heroCardsLeft: HeroCard[] = [
+  {
+    Icon: Bot,
+    title: "IA Especializada",
+    body: "Uma IA especializada no seu segmento, pronta para auxiliar sua equipe com cada oportunidade.",
+    opacity: 0.95,
+  },
   {
     Icon: Database,
     title: "CRM Inteligente",
@@ -212,12 +240,6 @@ const heroCardsLeft: HeroCard[] = [
     body: "Reduza o tempo entre o primeiro contato e a próxima ação.",
     opacity: 0.96,
   },
-  {
-    Icon: Bot,
-    title: "IA Comercial",
-    body: "Sugestões de abordagem com base no perfil e etapa do lead.",
-    opacity: 0.92,
-  },
 ];
 
 const heroCardsRight: HeroCard[] = [
@@ -228,21 +250,21 @@ const heroCardsRight: HeroCard[] = [
     opacity: 0.95,
   },
   {
+    Icon: CalendarDays,
+    title: "Agenda Integrada",
+    body: "Agenda sincronizada com o Google para organizar reuniões, retornos e compromissos sem perder oportunidades.",
+    opacity: 0.9,
+  },
+  {
     Icon: KanbanSquare,
     title: "Pipeline Visual",
     body: "Acompanhe cada negociação do primeiro contato ao fechamento.",
     opacity: 0.9,
   },
   {
-    Icon: CalendarDays,
-    title: "Agenda Integrada",
-    body: "Reuniões, retornos e compromissos comerciais sempre no radar.",
-    opacity: 0.9,
-  },
-  {
     Icon: BarChart3,
-    title: "Dashboard de Gestão",
-    body: "Metas, performance e oportunidades em uma visão simples.",
+    title: "Dashboard",
+    body: "Tenha uma visão completa das metas, performance da equipe e das oportunidades em andamento, tudo em tempo real.",
     opacity: 0.95,
   },
 ];
@@ -287,7 +309,7 @@ function PhaseHero({ scrollYProgress }: { scrollYProgress: MotionValue<number> }
       {/* ── TEXT BLOCK — exits upward ── */}
       <motion.div
         className="absolute"
-        style={{ top: "8.5%", left: "6%", maxWidth: "min(38vw, 470px)", y: textExitY, opacity: textExitOp }}
+        style={{ top: "5.5%", left: "6%", maxWidth: "min(38vw, 470px)", y: textExitY, opacity: textExitOp }}
       >
         {/* Logo oficial */}
         <motion.div
@@ -300,7 +322,7 @@ function PhaseHero({ scrollYProgress }: { scrollYProgress: MotionValue<number> }
           <img
             src="/logo-vendas-mais-oficial-colorido.png"
             alt="Vendas Mais"
-            style={{ width: 130, height: "auto", overflow: "hidden" }}
+            style={{ width: 190, height: "auto", overflow: "hidden" }}
           />
         </motion.div>
 
@@ -333,11 +355,11 @@ function PhaseHero({ scrollYProgress }: { scrollYProgress: MotionValue<number> }
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.65, delay: 0.34, ease: e }}
         >
-          CRM, IA e automação comercial para organizar
+          Uma IA especializada no seu negócio, treinada
           <br />
-          leads, acelerar respostas e transformar
+          para orientar sua equipe, acelerar decisões e
           <br />
-          oportunidades em vendas reais.
+          transformar oportunidades em vendas reais.
         </motion.p>
       </motion.div>
 
@@ -349,7 +371,7 @@ function PhaseHero({ scrollYProgress }: { scrollYProgress: MotionValue<number> }
           animate={{ opacity: 1 }}
           transition={{ duration: 0.62, delay: 0.22, ease: e }}
         >
-          <BottomCTA label="Quero vender mais" placement="heroTopRight" />
+          <BottomCTA label="Quero vender mais" placement="heroTopRight" big pulse />
         </motion.div>
       </motion.div>
 
@@ -472,24 +494,42 @@ function PhasePain({ scrollYProgress }: { scrollYProgress: MotionValue<number> }
         }}
       >
         <motion.h2
-          className="font-black text-left"
+          className="font-black text-right"
           style={{
             gridColumn: "1 / -1",
-            justifySelf: "start",
+            justifySelf: "end",
             ...vmTitleLineBase,
             color: "#ffffff",
-            ...ts,
           }}
           initial={{ opacity: 0, x: 56 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.68, delay: 0.05, ease: e }}
         >
-          Quantos leads sua
+          Quantos leads sua empresa
           <br />
-          empresa deixa de
+          deixa de aproveitar
           <br />
-          <VmTitleAccent>aproveitar todos os dias?</VmTitleAccent>
+          <VmTitleAccent>todos os dias?</VmTitleAccent>
         </motion.h2>
+        <motion.p
+          className="text-right font-medium"
+          style={{
+            gridColumn: "1 / -1",
+            justifySelf: "end",
+            maxWidth: 460,
+            marginTop: 16,
+            fontSize: "clamp(12px, 0.95vw, 15px)",
+            lineHeight: 1.45,
+            color: "rgba(255,255,255,0.80)",
+            ...ts,
+          }}
+          initial={{ opacity: 0, x: 56 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.68, delay: 0.16, ease: e }}
+        >
+          Sua empresa pode estar deixando oportunidades valiosas escaparem por
+          não contar com um processo estruturado de gestão comercial.
+        </motion.p>
       </motion.div>
 
       {/* Pain cards — 4 boxes estreitos, alinhados à direita (fora do celular) */}
@@ -538,7 +578,7 @@ function PhasePain({ scrollYProgress }: { scrollYProgress: MotionValue<number> }
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.22, ease: e }}
         >
-          <BottomCTA label="Quero mais vendas" placement="painCardsRight" />
+          <BottomCTA label="Quero converter mais leads" placement="painCardsRight" big />
         </motion.div>
       </motion.div>
     </motion.div>
@@ -564,24 +604,20 @@ function PhaseSolution({ scrollYProgress }: { scrollYProgress: MotionValue<numbe
       className="absolute inset-0"
     >
       {/* Text — left side. Video shows dashboard+AURA on right. */}
-      <motion.div className="absolute flex flex-col gap-4" style={{ top: "7.5%", left: "6.5%", maxWidth: "44%", y: textExitY, opacity: textExitOp }}>
-        <h2 className="font-black" style={{ ...vmTitleLineBase, color: "#ffffff", ...ts }}>
-          <span className="block" style={{ whiteSpace: "nowrap" }}>
-            Foi pensando nisso que
-          </span>
-          <span className="block" style={{ whiteSpace: "nowrap" }}>
-            criamos a inteligência comercial
-          </span>
-          <span className="block" style={{ whiteSpace: "nowrap" }}>
-            <VmTitleAccent>do Vendas Mais</VmTitleAccent>
+      <motion.div className="absolute flex flex-col gap-4" style={{ top: "7.5%", left: "6.5%", maxWidth: "48%", y: textExitY, opacity: textExitOp }}>
+        <h2 className="font-black" style={{ ...vmTitleLineBase, color: "#ffffff" }}>
+          <span className="block">Transforme oportunidades em</span>
+          <span className="block">vendas com uma</span>
+          <span className="block">
+            <VmTitleAccent>IA especializada no seu negócio</VmTitleAccent>
           </span>
         </h2>
         <p
           className="text-base font-medium leading-relaxed"
           style={{ color: "rgba(255,255,255,0.80)", maxWidth: 690, ...ts }}
         >
-          Uma plataforma completa que une alta tecnologia com um processo
-          comercial eficiente para transformar o dia a dia das suas vendas.
+          Uma inteligência comercial que aprende o seu mercado, orienta sua
+          equipe e organiza todo o processo de vendas em um único lugar.
         </p>
       </motion.div>
 
@@ -589,16 +625,23 @@ function PhaseSolution({ scrollYProgress }: { scrollYProgress: MotionValue<numbe
   );
 }
 
-// ─── PHASE 4: AUTHORITY — SEQUENTIAL GRID ────────────────────────
+// ─── PHASE 4: PESQUISA / INTELIGÊNCIA DE LEADS ───────────────────
 const authorityCards: Array<{ Icon: LucideIcon; title: string; body: string }> = [
-  { Icon: Bot,          title: "IA especializada",      body: "Sugestões comerciais pensadas para vendas, não respostas genéricas." },
-  { Icon: Database,     title: "CRM estruturado",       body: "Leads, histórico e etapas do funil organizados em uma rotina clara." },
-  { Icon: RefreshCw,    title: "Follow-up consistente", body: "Acompanhamento no tempo certo para nenhuma oportunidade esfriar." },
-  { Icon: KanbanSquare, title: "Pipeline visual",       body: "Visão simples do avanço de cada negociação até o fechamento." },
-  { Icon: BarChart3,    title: "Gestão em tempo real",  body: "Metas, performance e oportunidades sempre visíveis para a equipe." },
-  { Icon: Smartphone,   title: "Uso simples no celular",body: "Interface pensada para vendedores agirem rápido, inclusive no mobile." },
-  { Icon: GraduationCap,title: "Academy e mentorias",  body: "Conteúdo prático para elevar abordagem, negociação e fechamento." },
-  { Icon: Target,       title: "Processo escalável",    body: "Menos improviso e mais previsibilidade para vender todos os dias." },
+  {
+    Icon: Globe,
+    title: "Pesquisa WEB",
+    body: "Encontre informações relevantes sobre empresas, pessoas e serviços para iniciar conversas mais qualificadas.",
+  },
+  {
+    Icon: Camera,
+    title: "Pesquisa Instagram",
+    body: "Nossa IA analisa o perfil da empresa ou pessoa, identifica posicionamento, conteúdo, diferenciais e oportunidades para personalizar sua abordagem comercial.",
+  },
+  {
+    Icon: Briefcase,
+    title: "Pesquisa LinkedIn",
+    body: "Descubra tomadores de decisão, conheça a estrutura da empresa e obtenha insights estratégicos para prospectar com mais eficiência.",
+  },
 ];
 
 function AuthorityCompactCard({
@@ -623,34 +666,35 @@ function AuthorityCompactCard({
 
   return (
     <motion.div
-      className="flex items-start gap-2.5 rounded-xl"
+      className="flex items-start gap-3 rounded-xl"
       style={{
         opacity,
         y,
-        padding: "10px 12px",
-        backgroundColor: "rgba(255,255,255,0.07)",
+        padding: "14px 16px",
         backdropFilter: "blur(14px)",
         WebkitBackdropFilter: "blur(14px)",
-        border: "1px solid rgba(255,255,255,0.12)",
-        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), 0 8px 24px rgba(0,0,0,0.22)",
+        // Fumê com borda amarela (padrão da Fase 2)
+        backgroundColor: "rgba(5,10,20,0.68)",
+        border: "1px solid rgba(217,154,30,0.58)",
+        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), 0 12px 32px rgba(0,0,0,0.40)",
       }}
     >
       <span
         className="flex flex-shrink-0 items-center justify-center rounded-lg"
         style={{
-          width: 30,
-          height: 30,
+          width: 34,
+          height: 34,
           background: "rgba(45,156,255,0.12)",
           border: "1px solid rgba(45,156,255,0.22)",
         }}
       >
-        <Icon size={14} strokeWidth={1.8} color="#2D9CFF" />
+        <Icon size={17} strokeWidth={1.8} color="#2D9CFF" />
       </span>
       <div>
-        <p className="text-[11px] font-black leading-tight" style={{ color: "#ffffff" }}>
+        <p className="text-[13px] font-black leading-tight" style={{ color: "#ffffff" }}>
           {title}
         </p>
-        <p className="mt-0.5 text-[10px] font-medium leading-snug" style={{ color: "rgba(255,255,255,0.58)" }}>
+        <p className="mt-1 text-[11px] font-medium leading-snug" style={{ color: "rgba(255,255,255,0.78)" }}>
           {body}
         </p>
       </div>
@@ -670,22 +714,22 @@ function PhaseAuthority({ scrollYProgress }: { scrollYProgress: MotionValue<numb
       transition={vmTransition}
       className="absolute inset-0"
     >
-      <div className="absolute" style={{ top: "13%", right: "6%", width: "44%" }}>
+      <div className="absolute" style={{ top: "12%", right: "6%", width: "44%" }}>
         <VmTitle as="h2" style={ts}>
-          Processo para
+          Conheça seus leads antes
           <br />
-          <VmTitleAccent>vender mais</VmTitleAccent>
+          mesmo do <VmTitleAccent>primeiro contato</VmTitleAccent>
         </VmTitle>
         <p className="mt-3 max-w-xl text-sm font-medium leading-relaxed" style={{ color: "rgba(255,255,255,0.72)", ...ts }}>
-          IA, CRM e acompanhamento em uma rotina simples
-          <br />
-          para tirar vendas do improviso.
+          Pesquise empresas e pessoas, encontre informações estratégicas e deixe
+          nossa IA analisar os dados para gerar abordagens personalizadas e mais
+          assertivas, aumentando suas chances de conversão.
         </p>
       </div>
 
       <div
-        className="absolute grid grid-cols-2 gap-2"
-        style={{ top: "38%", right: "6%", width: "44%" }}
+        className="absolute flex flex-col gap-3"
+        style={{ top: "40%", right: "6%", width: "44%" }}
       >
         {authorityCards.map((card, index) => (
           <AuthorityCompactCard
@@ -714,39 +758,53 @@ const phase5Features: Array<
   }
 > = [
   {
-    Icon: Bot,
-    title: "IA especializada",
-    body: "Para vendas, não uma IA genérica.",
+    Icon: Mail,
+    title: "Disparo de e-mail e WhatsApp",
+    body: "Envie campanhas e comunique-se com clientes de forma rápida e profissional.",
     side: "left",
-    top: "31%",
+    top: "22%",
+  },
+  {
+    Icon: Search,
+    title: "Buscador de empresas",
+    body: "Encontre empresas por região, segmento e atividade em poucos segundos.",
+    side: "left",
+    top: "38.5%",
+  },
+  {
+    Icon: Users,
+    title: "Gestão de equipes",
+    body: "Defina metas, acompanhe resultados e gerencie sua equipe com facilidade.",
+    side: "left",
+    top: "55%",
   },
   {
     Icon: Database,
-    title: "CRM estruturado",
-    body: "Para a rotina comercial real.",
+    title: "CRM Profissional",
+    body: "Organize clientes e oportunidades sem perder negociações importantes.",
     side: "left",
-    top: "43.5%",
+    top: "71.5%",
   },
   {
-    Icon: Link2,
-    title: "Acompanhamento integrado",
-    body: "Processo conectado na rotina comercial.",
-    side: "left",
-    top: "57%",
-  },
-  {
-    Icon: BarChart3,
-    title: "Visão de gestão",
-    body: "Para equipes, metas e performance.",
+    Icon: Bot,
+    title: "IA inteligente",
+    body: "IA treinada para o seu negócio com sugestões e estratégias personalizadas.",
     side: "right",
-    top: "35%",
+    top: "30%",
   },
   {
-    Icon: Smartphone,
-    title: "Uso simples",
-    body: "Plataforma pensada para o celular e o dia a dia.",
+    Icon: Megaphone,
+    title: "Campanhas de pré-vendas",
+    body: "Crie campanhas segmentadas para prospectar com mais eficiência.",
     side: "right",
-    top: "49.5%",
+    top: "46.5%",
+  },
+  {
+    Icon: Share2,
+    title: "Redes Sociais",
+    body: "Pesquise empresas e obtenha dados estratégicos a partir do Instagram e LinkedIn.",
+    side: "right",
+    top: "63%",
   },
 ];
 
@@ -768,7 +826,7 @@ function PhaseCTA() {
       {/* ── TOP: título + subtítulo ── */}
       <motion.div
         className="absolute text-center"
-        style={{ top: "5.8%", left: "5%", right: "5%" }}
+        style={{ top: "3%", left: "5%", right: "5%" }}
         initial={{ opacity: 0, y: 36 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.65, delay: 0.05, ease: e }}
@@ -783,19 +841,20 @@ function PhaseCTA() {
             ...ts,
           }}
         >
-          Tecnologia aplicada para <VmTitleAccent>vender mais</VmTitleAccent>
+          Mais que um <VmTitleAccent>CRM</VmTitleAccent>
         </VmTitle>
         <p
-          className="mx-auto mt-4 font-medium"
+          className="mx-auto mt-2 font-medium"
           style={{
-            maxWidth: "min(96vw, 1280px)",
+            maxWidth: "94vw",
             color: "rgba(255,255,255,0.68)",
-            fontSize: "clamp(13px, 0.95vw, 16px)",
+            fontSize: 14,
+            lineHeight: 1.25,
             whiteSpace: "nowrap",
             ...ts,
           }}
         >
-          Vender não é sorte. É processo, consistência e acompanhamento. O Vendas Mais transforma esses três pilares em sistema.
+          Uma Inteligência Artificial personalizada para o seu segmento, capaz de organizar, orientar e impulsionar todo o seu processo de vendas.
         </p>
       </motion.div>
 
@@ -829,7 +888,7 @@ function PhaseCTA() {
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.65, delay: 0.46, ease: e }}
       >
-        <VmCtaLink label="Agendar demonstração" className="cta-phone-glow" />
+        <VmCtaLink label="Agendar demonstração" className="cta-phone-glow" big />
       </motion.div>
     </motion.div>
   );
@@ -873,22 +932,23 @@ const mobilePhaseCopy: Record<Phase, {
   },
   3: {
     tag: "Solução",
-    title: "Inteligência comercial aplicada à rotina",
-    body: "Uma plataforma completa para transformar processo comercial em execução simples no dia a dia.",
-    bullets: ["Processo claro", "Dados centralizados", "Ações sugeridas"],
+    title: "Transforme oportunidades em vendas",
+    highlight: "IA especializada no seu negócio",
+    body: "Uma inteligência comercial que aprende o seu mercado, orienta sua equipe e organiza todo o processo de vendas em um único lugar.",
+    bullets: ["Aprende seu mercado", "Orienta a equipe", "Processo único"],
   },
   4: {
-    tag: "Autoridade",
-    title: "Processo para vender mais",
-    body: "IA, CRM, pipeline visual e gestão em tempo real para reduzir improviso e ganhar previsibilidade.",
-    bullets: ["Pipeline visual", "Gestão em tempo real", "Academy e mentorias"],
+    tag: "Pesquisa",
+    title: "Conheça seus leads antes do primeiro contato",
+    body: "Pesquise empresas e pessoas, encontre informações estratégicas e deixe a IA gerar abordagens personalizadas e mais assertivas.",
+    bullets: ["Pesquisa WEB", "Pesquisa Instagram", "Pesquisa LinkedIn"],
   },
   5: {
-    tag: "Demonstração",
-    title: "Tecnologia aplicada para vender mais",
+    tag: "Plataforma",
+    title: "Mais que um CRM",
     highlight: "Agende uma demonstração",
-    body: "Processo, consistência e acompanhamento transformados em sistema comercial.",
-    bullets: ["Uso simples no celular", "IA especializada", "CRM estruturado"],
+    body: "Uma Inteligência Artificial personalizada para o seu segmento, capaz de organizar, orientar e impulsionar todo o seu processo de vendas.",
+    bullets: ["IA inteligente", "CRM Profissional", "Campanhas de pré-vendas"],
     cta: "Agendar demonstração",
   },
 };
