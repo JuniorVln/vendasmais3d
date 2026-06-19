@@ -1,5 +1,6 @@
 // Update TOTAL_FRAMES after running: npm run extract-frames
-export const TOTAL_FRAMES = 575;
+// Frames extraídos de "video final.mp4" (3840x2160 → escala 1920w), 30fps, 604 frames (0000–0603).
+export const TOTAL_FRAMES = 604;
 export const FRAMES_PATH = "/frames";
 // Use the checked-in video by default. Run npm run encode-scroll if a keyframe-per-frame file is needed later.
 export const VIDEO_SCROLL_PATH = "/videos/vm-scroll.mp4";

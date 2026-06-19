@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { MotionValue, useMotionValueEvent, AnimatePresence, motion } from "framer-motion";
 import VmLogo from "./VmLogo";
-import { VIDEO_SCROLL_PATH, VIDEO_FALLBACK_PATH } from "@/data/vmData";
 
 interface VMScrollCanvasProps {
   scrollYProgress: MotionValue<number>;
@@ -11,26 +10,38 @@ interface VMScrollCanvasProps {
   framesPath: string;
 }
 
+// Fase de autoridade: segura o mesmo frame enquanto os cards animam.
 const AUTHORITY_PHASE_START = 0.52;
 const AUTHORITY_PHASE_END = 0.8;
 const AUTHORITY_HOLD_PROGRESS = 0.739;
 
-type VideoWithVFC = HTMLVideoElement & {
-  requestVideoFrameCallback: (cb: () => void) => number;
-  cancelVideoFrameCallback: (handle: number) => void;
-};
+// Suavização do scrub: quanto menor, mais "pesado/suave" (0–1).
+const EASE = 0.12;
 
-export default function VMScrollCanvas({ scrollYProgress }: VMScrollCanvasProps) {
+export default function VMScrollCanvas({
+  scrollYProgress,
+  totalFrames,
+  framesPath,
+}: VMScrollCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const imagesRef = useRef<HTMLImageElement[]>([]);
+  const targetFrameRef = useRef(0);
+  const currentFrameRef = useRef(0);
+  const lastDrawnRef = useRef(-1);
+  const rafRef = useRef<number>(0);
   const [isReady, setIsReady] = useState(false);
   const [loadProgress, setLoadProgress] = useState(0);
-  const frameHandleRef = useRef<number>(0);
 
-  const drawFrame = useCallback(() => {
-    const video = videoRef.current;
+  const frameSrc = useCallback(
+    (i: number) => `${framesPath}/${String(i).padStart(4, "0")}.jpg`,
+    [framesPath],
+  );
+
+  // ── Desenha um frame específico no canvas (cover-fit + DPR) ──
+  const drawFrame = useCallback((index: number) => {
     const canvas = canvasRef.current;
-    if (!video || !canvas) return;
+    const img = imagesRef.current[index];
+    if (!canvas || !img || !img.complete || img.naturalWidth === 0) return;
     const ctx = canvas.getContext("2d", { alpha: false });
     if (!ctx) return;
 
@@ -39,7 +50,6 @@ export default function VMScrollCanvas({ scrollYProgress }: VMScrollCanvasProps)
     const cssH = canvas.offsetHeight;
     const targetW = Math.round(cssW * dpr);
     const targetH = Math.round(cssH * dpr);
-
     if (canvas.width !== targetW || canvas.height !== targetH) {
       canvas.width = targetW;
       canvas.height = targetH;
@@ -49,97 +59,93 @@ export default function VMScrollCanvas({ scrollYProgress }: VMScrollCanvasProps)
     ctx.imageSmoothingQuality = "high";
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    const vw = video.videoWidth;
-    const vh = video.videoHeight;
-    const scale = Math.max(cssW / vw, cssH / vh);
-    const x = (cssW - vw * scale) / 2;
-    const y = (cssH - vh * scale) / 2;
-    ctx.drawImage(video, x, y, vw * scale, vh * scale);
+    const iw = img.naturalWidth;
+    const ih = img.naturalHeight;
+    const scale = Math.max(cssW / iw, cssH / ih);
+    const x = (cssW - iw * scale) / 2;
+    const y = (cssH - ih * scale) / 2;
+    ctx.drawImage(img, x, y, iw * scale, ih * scale);
   }, []);
 
-  // Continuous frame loop: requestVideoFrameCallback (Chrome/Safari) → rAF fallback
-  // Fires whenever the video has a new decoded frame ready — zero wasted draws
-  const startFrameLoop = useCallback((video: HTMLVideoElement) => {
-    const vfc = video as VideoWithVFC;
-    const hasVFC = typeof vfc.requestVideoFrameCallback === "function";
-
-    if (hasVFC) {
-      const onVFC = () => {
-        drawFrame();
-        frameHandleRef.current = vfc.requestVideoFrameCallback(onVFC);
-      };
-      frameHandleRef.current = vfc.requestVideoFrameCallback(onVFC);
-      return () => vfc.cancelVideoFrameCallback(frameHandleRef.current);
-    }
-
-    // rAF fallback: draw every animation frame
-    const onRaf = () => {
-      drawFrame();
-      frameHandleRef.current = requestAnimationFrame(onRaf);
-    };
-    frameHandleRef.current = requestAnimationFrame(onRaf);
-    return () => cancelAnimationFrame(frameHandleRef.current);
-  }, [drawFrame]);
-
+  // ── Pré-carrega todos os frames ──
   useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
+    let cancelled = false;
+    let loaded = 0;
+    const imgs: HTMLImageElement[] = new Array(totalFrames);
 
-    const onProgress = () => {
-      if (video.buffered.length && video.duration) {
-        const end = video.buffered.end(video.buffered.length - 1);
-        setLoadProgress(end / video.duration);
-      }
+    const onOne = () => {
+      if (cancelled) return;
+      loaded += 1;
+      setLoadProgress(loaded / totalFrames);
+      // Desenha o primeiro frame assim que disponível
+      if (loaded === 1) drawFrame(0);
+      if (loaded >= totalFrames) setIsReady(true);
     };
 
-    const onCanPlay = () => {
-      drawFrame();
-      setIsReady(true);
-      setLoadProgress(1);
-    };
-
-    video.addEventListener("progress", onProgress);
-    video.addEventListener("canplay", onCanPlay);
-    if (video.readyState >= 3) onCanPlay();
+    for (let i = 0; i < totalFrames; i++) {
+      const img = new Image();
+      img.decoding = "async";
+      img.onload = onOne;
+      img.onerror = onOne; // não trava o loader se um frame falhar
+      img.src = frameSrc(i);
+      imgs[i] = img;
+    }
+    imagesRef.current = imgs;
 
     return () => {
-      video.removeEventListener("progress", onProgress);
-      video.removeEventListener("canplay", onCanPlay);
+      cancelled = true;
     };
-  }, [drawFrame]);
+  }, [totalFrames, frameSrc, drawFrame]);
 
-  // Start the frame loop once ready
+  // ── Loop de animação: interpola o frame atual em direção ao alvo (lerp) ──
   useEffect(() => {
-    const video = videoRef.current;
-    if (!isReady || !video) return;
-    return startFrameLoop(video);
-  }, [isReady, startFrameLoop]);
+    if (!isReady) return;
+    const maxFrame = totalFrames - 1;
 
-  // Redraw on resize
+    const tick = () => {
+      const target = targetFrameRef.current;
+      const cur = currentFrameRef.current;
+      const diff = target - cur;
+      // Aproxima suavemente; "snap" quando muito perto pra parar de desenhar.
+      const next = Math.abs(diff) < 0.25 ? target : cur + diff * EASE;
+      currentFrameRef.current = next;
+
+      const idx = Math.max(0, Math.min(maxFrame, Math.round(next)));
+      if (idx !== lastDrawnRef.current) {
+        drawFrame(idx);
+        lastDrawnRef.current = idx;
+      }
+      rafRef.current = requestAnimationFrame(tick);
+    };
+    rafRef.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafRef.current);
+  }, [isReady, totalFrames, drawFrame]);
+
+  // ── Scroll → frame alvo (com o "hold" da fase de autoridade) ──
+  useMotionValueEvent(scrollYProgress, "change", (latest) => {
+    let p: number;
+    if (latest < AUTHORITY_PHASE_START) {
+      p = latest * (AUTHORITY_HOLD_PROGRESS / AUTHORITY_PHASE_START);
+    } else if (latest < AUTHORITY_PHASE_END) {
+      p = AUTHORITY_HOLD_PROGRESS;
+    } else {
+      p = AUTHORITY_HOLD_PROGRESS + (latest - AUTHORITY_PHASE_END);
+    }
+    p = Math.max(0, Math.min(1, p));
+    targetFrameRef.current = p * (totalFrames - 1);
+  });
+
+  // ── Redesenha no resize ──
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const obs = new ResizeObserver(drawFrame);
+    const obs = new ResizeObserver(() => {
+      lastDrawnRef.current = -1; // força redraw
+      drawFrame(Math.round(currentFrameRef.current));
+    });
     obs.observe(canvas);
     return () => obs.disconnect();
   }, [drawFrame]);
-
-  // On scroll: just set currentTime — the frame loop draws when decoded (fire and forget)
-  useMotionValueEvent(scrollYProgress, "change", (latest) => {
-    const video = videoRef.current;
-    if (!video || !isReady) return;
-
-    let effectiveProgress: number;
-    if (latest < AUTHORITY_PHASE_START) {
-      effectiveProgress = latest * (AUTHORITY_HOLD_PROGRESS / AUTHORITY_PHASE_START);
-    } else if (latest < AUTHORITY_PHASE_END) {
-      effectiveProgress = AUTHORITY_HOLD_PROGRESS;
-    } else {
-      effectiveProgress = AUTHORITY_HOLD_PROGRESS + (latest - AUTHORITY_PHASE_END);
-    }
-
-    video.currentTime = effectiveProgress * video.duration;
-  });
 
   return (
     <div className="absolute inset-0 z-0">
@@ -158,10 +164,7 @@ export default function VMScrollCanvas({ scrollYProgress }: VMScrollCanvasProps)
             >
               <div
                 className="h-full rounded-full transition-all duration-100"
-                style={{
-                  width: `${loadProgress * 100}%`,
-                  backgroundColor: "#D99A1E",
-                }}
+                style={{ width: `${loadProgress * 100}%`, backgroundColor: "#D99A1E" }}
               />
             </div>
             <p
@@ -173,20 +176,6 @@ export default function VMScrollCanvas({ scrollYProgress }: VMScrollCanvasProps)
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Hidden video — decode source only; canvas renders the frames */}
-      <video
-        ref={videoRef}
-        muted
-        playsInline
-        preload="auto"
-        aria-hidden="true"
-        className="hidden"
-      >
-        {/* vm-scroll.mp4: keyint=1 — every frame is an independent keyframe */}
-        <source src={VIDEO_SCROLL_PATH} type="video/mp4" />
-        <source src={VIDEO_FALLBACK_PATH} type="video/mp4" />
-      </video>
 
       <canvas
         ref={canvasRef}

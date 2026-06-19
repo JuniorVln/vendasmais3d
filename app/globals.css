@@ -55,12 +55,36 @@ body {
   animation: ctaPhoneGlow 2.6s ease-in-out infinite;
 }
 
+@keyframes ctaPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow:
+      0 0 32px rgba(255,210,69,0.46),
+      0 0 0 1px rgba(255,210,69,0.40);
+  }
+  50% {
+    transform: scale(1.06);
+    box-shadow:
+      0 0 58px rgba(255,210,69,0.62),
+      0 0 0 8px rgba(255,210,69,0.10);
+  }
+}
+
+.cta-pulse {
+  animation: ctaPulse 2.2s ease-in-out infinite;
+}
+
+.cta-pulse:hover {
+  animation-play-state: paused;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
   }
 
-  .cta-phone-glow {
+  .cta-phone-glow,
+  .cta-pulse {
     animation: none;
   }
 }
