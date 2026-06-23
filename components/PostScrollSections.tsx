@@ -182,6 +182,18 @@ function BeforeAfterSection() {
             {...inViewFromLeft}
             transition={{ ...inViewFromLeft.transition, delay: 0.08 }}
           >
+            {/* Rótulo só no mobile — o celular central (desktop) some aqui e
+                as duas listas precisam de um marcador de "antes". */}
+            <span
+              className="inline-flex w-fit items-center gap-2 rounded-full px-4 py-1.5 text-xs font-black uppercase tracking-[0.16em] lg:hidden"
+              style={{
+                color: "#C0492B",
+                background: "rgba(192,73,43,0.08)",
+                border: "1px solid rgba(192,73,43,0.24)",
+              }}
+            >
+              Antes
+            </span>
             {beforeCopy.map((item, index) => (
               <motion.div
                 key={item.title}
@@ -216,6 +228,17 @@ function BeforeAfterSection() {
             {...inViewFromRight}
             transition={{ ...inViewFromRight.transition, delay: 0.08 }}
           >
+            {/* Rótulo só no mobile — marca o "depois" (soluções). */}
+            <span
+              className="inline-flex w-fit items-center gap-2 rounded-full px-4 py-1.5 text-xs font-black uppercase tracking-[0.16em] lg:hidden"
+              style={{
+                color: VM_TITLE_ACCENT,
+                background: "rgba(45,156,255,0.10)",
+                border: "1px solid rgba(45,156,255,0.30)",
+              }}
+            >
+              Depois
+            </span>
             {afterCopy.map((item, index) => (
               <motion.div
                 key={item.title}
@@ -434,7 +457,7 @@ function LeadModal({ open, onClose }: { open: boolean; onClose: () => void }) {
                 }}
               >
                 <ShoppingCart size={17} strokeWidth={2.2} />
-                Comprar agora
+                Começar agora
               </button>
             </div>
           </motion.div>

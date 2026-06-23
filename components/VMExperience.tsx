@@ -325,20 +325,20 @@ function PhaseHero({ scrollYProgress }: { scrollYProgress: MotionValue<number> }
       {/* ── TEXT BLOCK — exits upward ── */}
       <motion.div
         className="absolute"
-        style={{ top: "5.5%", left: "6%", maxWidth: "min(38vw, 470px)", y: textExitY, opacity: textExitOp }}
+        style={{ top: "4%", left: "6%", maxWidth: "min(38vw, 470px)", y: textExitY, opacity: textExitOp }}
       >
         {/* Logo oficial */}
         <motion.div
           initial={{ opacity: 0, y: 28 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.62, delay: 0, ease: e }}
-          style={{ marginBottom: 32 }}
+          style={{ marginBottom: 22 }}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/logo-vendas-mais-oficial-colorido.png"
             alt="Vendas Mais"
-            style={{ width: 190, height: "auto", overflow: "hidden" }}
+            style={{ width: 162, height: "auto", overflow: "hidden" }}
           />
         </motion.div>
 
