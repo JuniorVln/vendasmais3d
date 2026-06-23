@@ -14,6 +14,11 @@ const AUTHORITY_PHASE_START = 0.52;
 const AUTHORITY_PHASE_END = 0.8;
 const AUTHORITY_HOLD_PROGRESS = 0.739;
 
+// Ponto do scroll em que o vídeo chega ao ÚLTIMO frame (celular totalmente de
+// frente). Depois disso o frame final é segurado até liberar a próxima seção,
+// pra dar tempo de ver o vídeo terminar antes da transição.
+const VIDEO_FINISH_PROGRESS = 0.92;
+
 // Suavização do scrub: quanto menor, mais "pesado/suave" (0–1).
 const EASE = 0.12;
 
@@ -127,8 +132,16 @@ export default function VMScrollCanvas({
       p = latest * (AUTHORITY_HOLD_PROGRESS / AUTHORITY_PHASE_START);
     } else if (latest < AUTHORITY_PHASE_END) {
       p = AUTHORITY_HOLD_PROGRESS;
+    } else if (latest < VIDEO_FINISH_PROGRESS) {
+      // Reta final: roda do frame de autoridade até o último frame do vídeo.
+      p =
+        AUTHORITY_HOLD_PROGRESS +
+        (latest - AUTHORITY_PHASE_END) *
+          ((1 - AUTHORITY_HOLD_PROGRESS) /
+            (VIDEO_FINISH_PROGRESS - AUTHORITY_PHASE_END));
     } else {
-      p = AUTHORITY_HOLD_PROGRESS + (latest - AUTHORITY_PHASE_END);
+      // Segura o último frame (celular de frente) até a próxima seção entrar.
+      p = 1;
     }
     p = Math.max(0, Math.min(1, p));
     targetFrameRef.current = p * (totalFrames - 1);
