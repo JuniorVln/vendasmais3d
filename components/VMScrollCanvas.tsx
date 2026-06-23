@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { MotionValue, useMotionValueEvent, AnimatePresence, motion } from "framer-motion";
-import VmLogo from "./VmLogo";
 
 interface VMScrollCanvasProps {
   scrollYProgress: MotionValue<number>;
@@ -157,7 +156,12 @@ export default function VMScrollCanvas({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <VmLogo height={48} width={160} />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/logo-vendas-mais-oficial.png"
+              alt="Vendas Mais"
+              style={{ height: 48, width: "auto" }}
+            />
             <div
               className="w-64 h-1 rounded-full overflow-hidden"
               style={{ backgroundColor: "rgba(0,116,189,0.20)" }}

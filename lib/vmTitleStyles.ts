@@ -8,7 +8,7 @@ export const VM_TITLE_ON_LIGHT = "#0A1628";
 
 /** Tamanho e ritmo tipográfico do hero (“Mais vendas” / “Menos improviso”). */
 export const vmTitleLineBase: CSSProperties = {
-  fontSize: "clamp(30px, 2.9vw, 54px)",
+  fontSize: "clamp(24px, 2.3vw, 44px)",
   lineHeight: 1.02,
   letterSpacing: "-0.025em",
 };

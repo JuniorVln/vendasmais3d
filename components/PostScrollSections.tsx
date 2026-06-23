@@ -19,7 +19,6 @@ import {
   inViewScale,
 } from "@/lib/motionVariants";
 import { VM_TITLE_ACCENT, VM_TITLE_ON_LIGHT } from "@/lib/vmTitleStyles";
-import VmLogo from "./VmLogo";
 
 const beforeCopy = [
   {
@@ -165,8 +164,8 @@ function BeforeAfterSection() {
           <p
             className="mx-auto mt-5 text-center font-medium"
             style={{
-              maxWidth: 720,
-              fontSize: "clamp(14px, 1.05vw, 17px)",
+              maxWidth: 760,
+              fontSize: "clamp(18px, 1.3vw, 21px)",
               lineHeight: 1.5,
               color: "rgba(99,122,155,0.85)",
             }}
@@ -246,7 +245,7 @@ function BeforeAfterSection() {
         >
           <a
             href="#contato"
-            className="inline-flex items-center justify-center rounded-full font-black uppercase tracking-[0.12em] transition-all duration-300 hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+            className="cta-interactive inline-flex items-center justify-center rounded-full font-black uppercase tracking-[0.12em] hover:scale-110 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
             style={{
               backgroundColor: "#FFD245",
               color: "#050A14",
@@ -512,12 +511,16 @@ function FinalCTASection() {
           <div className="grid gap-12 lg:grid-cols-[1fr_0.68fr] lg:items-center">
             {/* Left: logo + headline + CTA */}
             <div>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/logo-vendas-mais-branco.png"
-                alt="Vendas Mais"
-                style={{ height: 44, width: "auto", marginBottom: 40, opacity: 0.92 }}
-              />
+              <div style={{ marginBottom: 40 }}>
+                <Image
+                  src="/logo-vendas-mais-oficial-colorido.png"
+                  alt="Vendas Mais"
+                  width={160}
+                  height={86}
+                  priority={false}
+                  style={{ height: "auto", width: 160 }}
+                />
+              </div>
 
               <VmTitle
                 as="h2"
@@ -530,8 +533,8 @@ function FinalCTASection() {
                 className="font-medium leading-relaxed"
                 style={{
                   color: "rgba(255,255,255,0.68)",
-                  fontSize: "clamp(15px, 1.1vw, 17px)",
-                  maxWidth: 480,
+                  fontSize: "clamp(18px, 1.3vw, 20px)",
+                  maxWidth: 500,
                   marginTop: 28,
                 }}
               >
@@ -543,7 +546,7 @@ function FinalCTASection() {
                 <button
                   type="button"
                   onClick={() => setLeadModalOpen(true)}
-                  className="inline-flex items-center justify-center rounded-full font-black uppercase tracking-[0.14em] transition-all duration-300 hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                  className="cta-interactive inline-flex items-center justify-center rounded-full font-black uppercase tracking-[0.14em] hover:scale-110 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
                   style={{
                     backgroundColor: "#FFD245",
                     color: "#050A14",
@@ -564,7 +567,7 @@ function FinalCTASection() {
                 <button
                   type="button"
                   onClick={() => setLeadModalOpen(true)}
-                  className="inline-flex items-center justify-center rounded-full font-black uppercase tracking-[0.14em] transition-all duration-300 hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                  className="cta-interactive inline-flex items-center justify-center rounded-full font-black uppercase tracking-[0.14em] hover:scale-110 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
                   style={{
                     background: "transparent",
                     color: "#ffffff",
@@ -641,12 +644,11 @@ function FinalCTASection() {
 
         {/* Footer strip */}
         <div
-          className="mt-12 flex flex-col items-center gap-3 md:flex-row md:justify-between"
-          style={{ opacity: 0.38 }}
+          className="mt-12 flex justify-center"
+          style={{ opacity: 0.5 }}
         >
-          <VmLogo height={24} width={80} />
-          <p className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.6)" }}>
-            © 2025 Vendas Mais. Todos os direitos reservados.
+          <p className="text-xs font-medium text-center" style={{ color: "rgba(255,255,255,0.6)" }}>
+            © 2026 Vendas Mais® - Desenvolvido por ArteOne Marketing Digital - Todos os direitos reservados.
           </p>
         </div>
       </div>
@@ -677,8 +679,8 @@ function DoubtVideoSection() {
           <p
             className="mx-auto mt-5 font-medium"
             style={{
-              maxWidth: 740,
-              fontSize: "clamp(14px, 1.05vw, 17px)",
+              maxWidth: 780,
+              fontSize: "clamp(18px, 1.3vw, 21px)",
               lineHeight: 1.55,
               color: "rgba(255,255,255,0.68)",
             }}
@@ -724,7 +726,7 @@ function DoubtVideoSection() {
         >
           <a
             href="#contato"
-            className="inline-flex items-center justify-center rounded-full font-black uppercase tracking-[0.12em] transition-all duration-300 hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+            className="cta-interactive inline-flex items-center justify-center rounded-full font-black uppercase tracking-[0.12em] hover:scale-110 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
             style={{
               backgroundColor: "#FFD245",
               color: "#050A14",

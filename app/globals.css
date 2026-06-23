@@ -74,8 +74,27 @@ body {
   animation: ctaPulse 2.2s ease-in-out infinite;
 }
 
+/* Solta a animação no hover para o transform/box-shadow de interação valerem. */
 .cta-pulse:hover {
-  animation-play-state: paused;
+  animation: none;
+}
+
+/* Feedback de interação forte e padronizado em todos os CTAs. */
+.cta-interactive {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.3s ease;
+}
+
+.cta-interactive:hover {
+  box-shadow:
+    0 0 52px rgba(255, 210, 69, 0.72),
+    0 0 0 2px rgba(255, 210, 69, 0.6);
+}
+
+.cta-interactive:active {
+  transform: scale(0.95);
+  box-shadow:
+    0 0 28px rgba(255, 210, 69, 0.5),
+    0 0 0 1px rgba(255, 210, 69, 0.45);
 }
 
 @media (prefers-reduced-motion: reduce) {

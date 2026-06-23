@@ -69,7 +69,7 @@ const vmCtaButtonStyle: React.CSSProperties = {
   letterSpacing: "0.06em",
   padding: "10px 26px",
   lineHeight: 1.2,
-  textTransform: "none",
+  textTransform: "uppercase",
   whiteSpace: "nowrap",
 };
 
@@ -78,6 +78,7 @@ function VmCtaLink({
   href = "#contato",
   className = "",
   big = false,
+  xl = false,
   pulse = false,
 }: {
   label: string;
@@ -85,17 +86,29 @@ function VmCtaLink({
   className?: string;
   /** Versão maior do botão (págs. 1 e 5). */
   big?: boolean;
+  /** Versão extra-larga (~3 cards) p/ o CTA da 1ª rolagem. */
+  xl?: boolean;
   /** Efeito pulsante contínuo (pág. 1). */
   pulse?: boolean;
 }) {
-  const style: React.CSSProperties = big
+  const style: React.CSSProperties = xl
+    ? {
+        ...vmCtaButtonStyle,
+        fontSize: 17,
+        padding: "18px 44px",
+        letterSpacing: "0.05em",
+        // ~3 cards de largura (card = clamp(118,10.2vw,158) + 2 gaps de 10px)
+        minWidth: "calc(3 * clamp(118px, 10.2vw, 158px) + 20px)",
+        textAlign: "center",
+      }
+    : big
     ? { ...vmCtaButtonStyle, fontSize: 14, padding: "14px 36px", letterSpacing: "0.05em" }
     : vmCtaButtonStyle;
 
   return (
     <a
       href={href}
-      className={`pointer-events-auto rounded-full font-semibold tracking-wide transition-all duration-300 hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${pulse ? "cta-pulse" : ""} ${className}`}
+      className={`cta-interactive pointer-events-auto rounded-full font-semibold tracking-wide hover:scale-110 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${pulse ? "cta-pulse" : ""} ${className}`}
       style={style}
       onMouseEnter={(e) => ((e.currentTarget as HTMLAnchorElement).style.backgroundColor = vmGoldLight)}
       onMouseLeave={(e) => ((e.currentTarget as HTMLAnchorElement).style.backgroundColor = vmGold)}
@@ -119,6 +132,7 @@ function BottomCTA({
   placement = "bottom",
   href = "#contato",
   big = false,
+  xl = false,
   pulse = false,
 }: {
   label: string;
@@ -127,6 +141,7 @@ function BottomCTA({
   placement?: "bottom" | "heroTopRight" | "painCardsRight";
   href?: string;
   big?: boolean;
+  xl?: boolean;
   pulse?: boolean;
 }) {
   const isHeroTopRight = placement === "heroTopRight";
@@ -145,7 +160,7 @@ function BottomCTA({
           : { bottom: compact ? 14 : 24, left: 0, right: 0 }
       }
     >
-      <VmCtaLink label={label} href={href} big={big} pulse={pulse} />
+      <VmCtaLink label={label} href={href} big={big} xl={xl} pulse={pulse} />
       {note && (
         <p className="text-xs font-medium pointer-events-none" style={{ color: "rgba(255,255,255,0.35)", ...ts }}>
           {note}
@@ -162,12 +177,13 @@ interface ChipCard {
   body: string;
   badge?: string;
 }
-function FeatureCard({ Icon, title, body, badge }: ChipCard) {
+function FeatureCard({ Icon, title, body, badge, minHeight }: ChipCard & { minHeight?: number }) {
   return (
     <div
       className="rounded-xl flex flex-col"
       style={{
         width: "clamp(240px, 22vw, 300px)",
+        minHeight,
         padding: "13px 16px",
         gap: 8,
         backdropFilter: "blur(16px)",
@@ -349,8 +365,8 @@ function PhaseHero({ scrollYProgress }: { scrollYProgress: MotionValue<number> }
           </motion.div>
         </div>
         <motion.p
-          className="mt-5 text-sm font-medium leading-relaxed"
-          style={{ maxWidth: "min(35vw, 480px)", color: "rgba(255,255,255,0.78)", ...ts }}
+          className="mt-5 text-[17px] font-medium leading-relaxed"
+          style={{ maxWidth: "min(38vw, 520px)", color: "rgba(255,255,255,0.78)", ...ts }}
           initial={{ opacity: 0, y: 28 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.65, delay: 0.34, ease: e }}
@@ -405,7 +421,7 @@ function PhaseHero({ scrollYProgress }: { scrollYProgress: MotionValue<number> }
                       animate={{ opacity: row.left!.opacity ?? 1, x: 0, y: 0 }}
                       transition={{ duration: 0.62, delay, ease: e }}
                     >
-                      <FeatureCard {...row.left!} />
+                      <FeatureCard {...row.left!} minHeight={104} />
                     </motion.div>
                   </motion.div>
                 );
@@ -426,7 +442,7 @@ function PhaseHero({ scrollYProgress }: { scrollYProgress: MotionValue<number> }
                       animate={{ opacity: row.right!.opacity ?? 1, x: 0, y: 0 }}
                       transition={{ duration: 0.62, delay, ease: e }}
                     >
-                      <FeatureCard {...row.right!} />
+                      <FeatureCard {...row.right!} minHeight={104} />
                     </motion.div>
                   </motion.div>
                 );
@@ -489,6 +505,10 @@ function PhasePain({ scrollYProgress }: { scrollYProgress: MotionValue<number> }
         style={{
           top: "6.3%",
           ...painCardsGridStyle,
+          // Alarga a caixa do título p/ a esquerda (cards seguem em 58%) e usa
+          // coluna única — evita a quebra em 4 linhas em telas de notebook.
+          left: "46%",
+          gridTemplateColumns: "1fr",
           y: headlineExitY,
           opacity: headlineExitOp,
         }}
@@ -499,6 +519,7 @@ function PhasePain({ scrollYProgress }: { scrollYProgress: MotionValue<number> }
             gridColumn: "1 / -1",
             justifySelf: "end",
             ...vmTitleLineBase,
+            fontSize: "clamp(22px, 2.05vw, 40px)",
             color: "#ffffff",
           }}
           initial={{ opacity: 0, x: 56 }}
@@ -518,7 +539,7 @@ function PhasePain({ scrollYProgress }: { scrollYProgress: MotionValue<number> }
             justifySelf: "end",
             maxWidth: 460,
             marginTop: 16,
-            fontSize: "clamp(12px, 0.95vw, 15px)",
+            fontSize: "clamp(16px, 1.25vw, 18px)",
             lineHeight: 1.45,
             color: "rgba(255,255,255,0.80)",
             ...ts,
@@ -578,7 +599,7 @@ function PhasePain({ scrollYProgress }: { scrollYProgress: MotionValue<number> }
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.22, ease: e }}
         >
-          <BottomCTA label="Quero converter mais leads" placement="painCardsRight" big />
+          <BottomCTA label="Quero converter mais leads" placement="painCardsRight" xl />
         </motion.div>
       </motion.div>
     </motion.div>
@@ -604,16 +625,16 @@ function PhaseSolution({ scrollYProgress }: { scrollYProgress: MotionValue<numbe
       className="absolute inset-0"
     >
       {/* Text — left side. Video shows dashboard+AURA on right. */}
-      <motion.div className="absolute flex flex-col gap-4" style={{ top: "7.5%", left: "6.5%", maxWidth: "48%", y: textExitY, opacity: textExitOp }}>
+      <motion.div className="absolute flex flex-col gap-4" style={{ top: "11%", left: "6.5%", maxWidth: "48%", y: textExitY, opacity: textExitOp }}>
         <h2 className="font-black" style={{ ...vmTitleLineBase, color: "#ffffff" }}>
-          <span className="block">Transforme oportunidades em</span>
-          <span className="block">vendas com uma</span>
+          <span className="block">Transforme oportunidades</span>
+          <span className="block">em vendas com uma</span>
           <span className="block">
             <VmTitleAccent>IA especializada no seu negócio</VmTitleAccent>
           </span>
         </h2>
         <p
-          className="text-base font-medium leading-relaxed"
+          className="text-[18px] font-medium leading-relaxed"
           style={{ color: "rgba(255,255,255,0.80)", maxWidth: 690, ...ts }}
         >
           Uma inteligência comercial que aprende o seu mercado, orienta sua
@@ -720,7 +741,7 @@ function PhaseAuthority({ scrollYProgress }: { scrollYProgress: MotionValue<numb
           <br />
           mesmo do <VmTitleAccent>primeiro contato</VmTitleAccent>
         </VmTitle>
-        <p className="mt-3 max-w-xl text-sm font-medium leading-relaxed" style={{ color: "rgba(255,255,255,0.72)", ...ts }}>
+        <p className="mt-3 max-w-xl text-[17px] font-medium leading-relaxed" style={{ color: "rgba(255,255,255,0.72)", ...ts }}>
           Pesquise empresas e pessoas, encontre informações estratégicas e deixe
           nossa IA analisar os dados para gerar abordagens personalizadas e mais
           assertivas, aumentando suas chances de conversão.
@@ -729,7 +750,7 @@ function PhaseAuthority({ scrollYProgress }: { scrollYProgress: MotionValue<numb
 
       <div
         className="absolute flex flex-col gap-3"
-        style={{ top: "40%", right: "6%", width: "44%" }}
+        style={{ top: "47%", right: "6%", width: "44%" }}
       >
         {authorityCards.map((card, index) => (
           <AuthorityCompactCard
@@ -844,17 +865,17 @@ function PhaseCTA() {
           Mais que um <VmTitleAccent>CRM</VmTitleAccent>
         </VmTitle>
         <p
-          className="mx-auto mt-2 font-medium"
+          className="mx-auto mt-2 text-center font-medium"
           style={{
-            maxWidth: "94vw",
+            maxWidth: 860,
             color: "rgba(255,255,255,0.68)",
-            fontSize: 14,
-            lineHeight: 1.25,
-            whiteSpace: "nowrap",
+            fontSize: "clamp(18px, 1.35vw, 22px)",
+            lineHeight: 1.4,
             ...ts,
           }}
         >
-          Uma Inteligência Artificial personalizada para o seu segmento, capaz de organizar, orientar e impulsionar todo o seu processo de vendas.
+          <span className="block">Uma Inteligência Artificial personalizada para o seu segmento,</span>
+          <span className="block">capaz de organizar, orientar e impulsionar todo o seu processo de vendas.</span>
         </p>
       </motion.div>
 
@@ -996,7 +1017,7 @@ function MobileVMExperience({ scrollYProgress }: VMExperienceProps) {
             </p>
           )}
           <p
-            className="mt-4 text-sm font-medium leading-relaxed"
+            className="mt-4 text-base font-medium leading-relaxed"
             style={{ color: "rgba(255,255,255,0.78)", ...ts }}
           >
             {copy.body}

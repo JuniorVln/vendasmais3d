@@ -2,10 +2,14 @@ interface VmLogoProps {
   height?: number;
   width?: number;
   className?: string;
+  /** Versão monocromática: sobrescreve a cor de todo o logo (ex. "#ffffff"). */
+  mono?: string;
 }
 
-export default function VmLogo({ height = 48, width = 160, className = "" }: VmLogoProps) {
+export default function VmLogo({ height = 48, width = 160, className = "", mono }: VmLogoProps) {
   const scale = height / 48;
+  const markFill = mono ?? "#D99A1E";
+  const textFill = mono ?? "#FFFFFF";
   return (
     <svg
       width={width}
@@ -23,7 +27,7 @@ export default function VmLogo({ height = 48, width = 160, className = "" }: VmL
         fontFamily="Montserrat, sans-serif"
         fontSize={Math.round(32 * scale)}
         fontWeight="900"
-        fill="#D99A1E"
+        fill={markFill}
         letterSpacing="-1"
       >
         vm+
@@ -34,7 +38,7 @@ export default function VmLogo({ height = 48, width = 160, className = "" }: VmL
         fontFamily="Montserrat, sans-serif"
         fontSize={Math.round(8 * scale)}
         fontWeight="700"
-        fill="#FFFFFF"
+        fill={textFill}
         letterSpacing="2"
         opacity="0.9"
       >
@@ -46,7 +50,7 @@ export default function VmLogo({ height = 48, width = 160, className = "" }: VmL
         fontFamily="Montserrat, sans-serif"
         fontSize={Math.round(8 * scale)}
         fontWeight="700"
-        fill="#FFFFFF"
+        fill={textFill}
         letterSpacing="2"
         opacity="0.9"
       >

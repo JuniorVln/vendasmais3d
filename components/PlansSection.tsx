@@ -18,7 +18,7 @@ export default function PlansSection() {
         lines={["Planos para cada", "momento comercial"]}
       />
       <p
-        className="mx-auto mb-12 max-w-2xl text-center text-sm leading-relaxed md:mb-16 md:text-base"
+        className="mx-auto mb-12 max-w-2xl text-center text-base leading-relaxed md:mb-16 md:text-lg"
         style={{ color: "rgba(255,255,255,0.50)" }}
       >
         {plansData.sub}
