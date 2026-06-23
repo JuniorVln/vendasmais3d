@@ -296,8 +296,8 @@ function BeforeAfterSection() {
 const WHATSAPP_NUMBER = "5551991387792";
 const WHATSAPP_BASE_MSG =
   "Olá, gostaria de agendar uma apresentação do sistema IA do Vendas Mais!";
-// TODO: substituir pelo link de compra quando o cliente enviar.
-const BUY_LINK_PLACEHOLDER = "";
+// Link de destino do botão "Começar agora" (abre em nova aba).
+const BUY_LINK = "https://www.iavendasmais.com/";
 
 function LeadModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [form, setForm] = useState({ nome: "", telefone: "", email: "" });
@@ -327,13 +327,8 @@ function LeadModal({ open, onClose }: { open: boolean; onClose: () => void }) {
     // Simulação de gravação do lead (integrar com backend/CRM futuramente).
     console.log("[lead] comprar", form);
 
-    if (BUY_LINK_PLACEHOLDER) {
-      window.open(BUY_LINK_PLACEHOLDER, "_blank", "noopener,noreferrer");
-      onClose();
-    } else {
-      // Placeholder até o link de compra ser entregue.
-      alert("O link de compra estará disponível em breve.");
-    }
+    window.open(BUY_LINK, "_blank", "noopener,noreferrer");
+    onClose();
   }
 
   const inputStyle: React.CSSProperties = {
