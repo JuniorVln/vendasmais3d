@@ -59,6 +59,9 @@ function useActivePhase(scrollYProgress: MotionValue<number>): Phase {
 const tx = vmTransition;
 const vmGold = "#FFD245";
 const vmGoldLight = "#FFE57A";
+/** Ciano da marca (mesmo azul do título) — usado no botão ENTRAR. */
+const vmCyan = "#2D9CFF";
+const vmCyanLight = "#5CB4FF";
 
 /** CTAs do scroll — mesma altura; largura proporcional ao texto (hero = referência). */
 const vmCtaButtonStyle: React.CSSProperties = {
@@ -80,6 +83,7 @@ function VmCtaLink({
   big = false,
   xl = false,
   pulse = false,
+  variant = "gold",
 }: {
   label: string;
   href?: string;
@@ -90,10 +94,22 @@ function VmCtaLink({
   xl?: boolean;
   /** Efeito pulsante contínuo (pág. 1). */
   pulse?: boolean;
+  /** Esquema de cor: dourado (padrão) ou ciano (ENTRAR). */
+  variant?: "gold" | "cyan";
 }) {
-  const style: React.CSSProperties = xl
+  const isCyan = variant === "cyan";
+  const baseStyle: React.CSSProperties = isCyan
     ? {
         ...vmCtaButtonStyle,
+        backgroundColor: vmCyan,
+        color: "#ffffff",
+        boxShadow: "0 0 32px rgba(45,156,255,0.46), 0 0 0 1px rgba(45,156,255,0.40)",
+      }
+    : vmCtaButtonStyle;
+
+  const style: React.CSSProperties = xl
+    ? {
+        ...baseStyle,
         fontSize: 17,
         padding: "18px 44px",
         letterSpacing: "0.05em",
@@ -102,16 +118,19 @@ function VmCtaLink({
         textAlign: "center",
       }
     : big
-    ? { ...vmCtaButtonStyle, fontSize: 14, padding: "14px 36px", letterSpacing: "0.05em" }
-    : vmCtaButtonStyle;
+    ? { ...baseStyle, fontSize: 14, padding: "14px 36px", letterSpacing: "0.05em" }
+    : baseStyle;
+
+  const hoverColor = isCyan ? vmCyanLight : vmGoldLight;
+  const restColor = isCyan ? vmCyan : vmGold;
 
   return (
     <a
       href={href}
       className={`cta-interactive pointer-events-auto rounded-full font-semibold tracking-wide hover:scale-110 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${pulse ? "cta-pulse" : ""} ${className}`}
       style={style}
-      onMouseEnter={(e) => ((e.currentTarget as HTMLAnchorElement).style.backgroundColor = vmGoldLight)}
-      onMouseLeave={(e) => ((e.currentTarget as HTMLAnchorElement).style.backgroundColor = vmGold)}
+      onMouseEnter={(e) => ((e.currentTarget as HTMLAnchorElement).style.backgroundColor = hoverColor)}
+      onMouseLeave={(e) => ((e.currentTarget as HTMLAnchorElement).style.backgroundColor = restColor)}
       aria-label={label}
     >
       {label}
@@ -160,7 +179,18 @@ function BottomCTA({
           : { bottom: compact ? 14 : 24, left: 0, right: 0 }
       }
     >
-      <VmCtaLink label={label} href={href} big={big} xl={xl} pulse={pulse} />
+      {isHeroTopRight ? (
+        <div className="flex items-center gap-5">
+          <VmCtaLink
+            label="Entrar"
+            href="https://app.iavendasmais.com"
+            variant="cyan"
+          />
+          <VmCtaLink label={label} href={href} xl={xl} pulse={pulse} />
+        </div>
+      ) : (
+        <VmCtaLink label={label} href={href} big={big} xl={xl} pulse={pulse} />
+      )}
       {note && (
         <p className="text-xs font-medium pointer-events-none" style={{ color: "rgba(255,255,255,0.35)", ...ts }}>
           {note}
@@ -379,15 +409,66 @@ function PhaseHero({ scrollYProgress }: { scrollYProgress: MotionValue<number> }
         </motion.p>
       </motion.div>
 
-      {/* ── CTA BUTTON — scroll exit + timed entrance ── */}
-      <motion.div className="absolute inset-0 pointer-events-none" style={{ opacity: ctaExitOp }}>
+      {/* ── ENTRAR BUTTON — top right corner ── */}
+      <motion.div
+        className="absolute pointer-events-none"
+        style={{ top: "4%", right: "5.8%", opacity: ctaExitOp }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.62, delay: 0.22, ease: e }}
+      >
+        <VmCtaLink
+          label="Entrar"
+          href="https://app.iavendasmais.com"
+          variant="cyan"
+          className="pointer-events-auto"
+        />
+      </motion.div>
+
+      {/* ── CTA BUTTON — above Follow-up Automático card (col. direita, row 1) ── */}
+      <motion.div
+        className="absolute pointer-events-none"
+        style={{
+          opacity: ctaExitOp,
+          // Alinha com a borda esquerda dos cards da coluna direita
+          left: heroRightAlignLeft,
+          // A grade de cards vai de top 33% a bottom 4%
+          // A primeira row ocupa ~25% da altura da grade → centro ≈ 33% + 0.25*63%/2 ≈ 41%
+          // Botão fica acima disso com o mesmo gap dos cards (~10px)
+          top: "23%",
+          x: rightExitX,
+        }}
+      >
         <motion.div
-          className="absolute inset-0 pointer-events-none"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.62, delay: 0.22, ease: e }}
+          className="pointer-events-auto"
+          initial={{ opacity: 0, x: 56, y: 20 }}
+          animate={{ opacity: 1, x: 0, y: 0 }}
+          transition={{ duration: 0.62, delay: 0.34, ease: e }}
         >
-          <BottomCTA label="Quero vender mais" placement="heroTopRight" big pulse />
+          <a
+            href="#contato"
+            className={`cta-interactive cta-pulse rounded-full font-semibold tracking-wide hover:scale-110 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2`}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "clamp(240px, 22vw, 300px)",
+              padding: "12px 16px",
+              backgroundColor: vmGold,
+              color: "#050A14",
+              fontSize: 12,
+              letterSpacing: "0.06em",
+              lineHeight: 1.2,
+              textTransform: "uppercase",
+              whiteSpace: "nowrap",
+              boxShadow: "0 0 32px rgba(255,210,69,0.46), 0 0 0 1px rgba(255,210,69,0.40)",
+            }}
+            onMouseEnter={(e) => ((e.currentTarget as HTMLAnchorElement).style.backgroundColor = vmGoldLight)}
+            onMouseLeave={(e) => ((e.currentTarget as HTMLAnchorElement).style.backgroundColor = vmGold)}
+            aria-label="Quero vender mais"
+          >
+            Quero vender mais
+          </a>
         </motion.div>
       </motion.div>
 
