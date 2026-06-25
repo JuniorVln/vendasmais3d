@@ -15,7 +15,7 @@
 
 # next.js
 /.next/
-/out/
+# /out/ versionado de propósito: cPanel serve o build estático via .cpanel.yml
 
 # production
 /build
