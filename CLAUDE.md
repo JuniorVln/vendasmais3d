@@ -16,7 +16,8 @@ A LP é um **Next.js export estático** servido na hospedagem compartilhada Host
 | IP da conta (Shared IP) | `69.49.241.115` |
 | Repo GitHub | `github.com/JuniorVln/vendasmais3d` (público, branch `master`) |
 | Clone no servidor | `~/repositories/vendasmais3d` |
-| SSH/Terminal | **habilitado** (cPanel → Terminal, ou SSH) |
+| SSH/Terminal | **habilitado** · porta `22` · login por **chave** (sem senha) |
+| Chave SSH (deploy) | local `~/.ssh/id_ed25519` · autorizada no cPanel como `claude_deploy` |
 
 > ⚠️ Sempre confirme o usuário real no Terminal com `echo $HOME` antes de mexer em caminhos.
 > Confundir o `i` com `l` (fontes pequenas) já causou deploy numa pasta aninhada errada.
@@ -43,12 +44,20 @@ const nextConfig: NextConfig = {
    git add -A && git commit -m "build: <descrição>"
    git push origin master
    ```
-2. No servidor — Terminal do cPanel (ou SSH), 1 comando:
+2. Deploy no servidor — **direto do local via SSH** (chave já configurada, sem senha):
    ```bash
-   cd ~/repositories/vendasmais3d && git pull && cp -a out/. ~/public_html/
+   ssh -i ~/.ssh/id_ed25519 vilso815@br1088.hostgator.com.br \
+     'cd ~/repositories/vendasmais3d && git pull && cp -a out/. ~/public_html/ && rm -f ~/public_html/default.html'
    ```
+   (Ou, se preferir manual: abrir o Terminal do cPanel e rodar só o trecho entre aspas.)
 
 Pronto, o site reflete na hora (Apache serve estático direto).
+
+> **Acesso SSH por chave** (configurado em 26/06/2026): a chave pública `~/.ssh/id_ed25519.pub`
+> foi importada/autorizada no cPanel (Acesso SSH → Gerenciar chaves, nome `claude_deploy`) via
+> API2 `SSH::importkey` + `SSH::authkey`. A **chave privada** fica só em `~/.ssh/id_ed25519`
+> nesta máquina — **nunca** comitar no repo (que é público). Para autorizar outra máquina, repita
+> a importação da pública dela no cPanel.
 
 ### Notas
 - O `~/public_html/.htaccess` (handler PHP gerado pelo cPanel) é inofensivo — pode manter.
