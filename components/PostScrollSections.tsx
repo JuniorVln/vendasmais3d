@@ -1,15 +1,7 @@
 "use client";
 
-import {
-  CalendarClock,
-  Mail,
-  Phone,
-  PlayCircle,
-  ShoppingCart,
-  X,
-} from "lucide-react";
-import { useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { Mail, Phone } from "lucide-react";
+import { motion } from "framer-motion";
 import Image from "next/image";
 import VmTitle, { VmTitleAccent } from "@/components/VmTitle";
 import {
@@ -19,6 +11,53 @@ import {
   inViewScale,
 } from "@/lib/motionVariants";
 import { VM_TITLE_ACCENT, VM_TITLE_ON_LIGHT } from "@/lib/vmTitleStyles";
+import { useLeadModal } from "@/components/LeadModals";
+import {
+  CONTACT_EMAIL,
+  WHATSAPP_LEAD_MSG,
+  WHATSAPP_NUMBER,
+  whatsappUrl,
+} from "@/lib/contact";
+
+/** Ícone do WhatsApp (lucide não tem o ícone da marca). */
+function WhatsAppIcon({ size = 18 }: { size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden="true"
+      className="flex-shrink-0"
+    >
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.71.306 1.263.489 1.694.625.712.227 1.36.195 1.872.118.571-.085 1.758-.719 2.006-1.413.247-.694.247-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0 0 20.464 3.488" />
+    </svg>
+  );
+}
+
+/** Botão verde de WhatsApp reutilizável (itens 5/7/8). */
+function WhatsAppCta({ label, message = WHATSAPP_LEAD_MSG }: { label: string; message?: string }) {
+  return (
+    <a
+      href={whatsappUrl(message)}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="cta-interactive cta-whatsapp inline-flex items-center justify-center gap-2.5 rounded-full font-black uppercase tracking-[0.12em] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+      style={{
+        backgroundColor: "#25D366",
+        color: "#ffffff",
+        fontSize: 14,
+        padding: "16px 40px",
+        boxShadow: "0 0 36px rgba(37,211,102,0.40), 0 0 0 1px rgba(37,211,102,0.40), inset 0 1px 0 rgba(255,255,255,0.18)",
+      }}
+      onMouseEnter={(e) => ((e.currentTarget as HTMLAnchorElement).style.backgroundColor = "#1FBF5B")}
+      onMouseLeave={(e) => ((e.currentTarget as HTMLAnchorElement).style.backgroundColor = "#25D366")}
+    >
+      <WhatsAppIcon size={20} />
+      {label}
+    </a>
+  );
+}
 
 const beforeCopy = [
   {
@@ -111,7 +150,7 @@ const contactCards = [
     prefix: "ATENDIMENTO POR",
     highlight: "WHATSAPP",
     sub: "Toque aqui para tirar as suas dúvidas",
-    href: "https://wa.me/5551991387792",
+    href: `https://wa.me/${WHATSAPP_NUMBER}`,
     linkLabel: null,
   },
   {
@@ -119,14 +158,18 @@ const contactCards = [
     prefix: "ATENDIMENTO POR",
     highlight: "EMAIL",
     sub: "Mande um e-mail agora para",
-    href: "mailto:contato@iavendasmais.com.br",
-    linkLabel: "contato@iavendasmais.com.br",
+    href: `mailto:${CONTACT_EMAIL}`,
+    linkLabel: CONTACT_EMAIL,
   },
 ];
 
 // ─── Dot-grid background SVG as data URL ────────────────────────
 const dotGrid =
   "radial-gradient(circle, rgba(255,255,255,0.038) 1px, transparent 1px)";
+
+// Vídeo de apresentação (seção "Ainda está em dúvida?"). Trocar aqui caso o
+// arquivo seja substituído.
+const DOUBT_VIDEO_SRC = "/videos/video-duvida.mp4";
 
 function BeforeAfterSection() {
   return (
@@ -266,204 +309,15 @@ function BeforeAfterSection() {
           {...inViewFadeUp}
           transition={{ ...inViewFadeUp.transition, delay: 0.1 }}
         >
-          <a
-            href="#contato"
-            className="cta-interactive inline-flex items-center justify-center rounded-full font-black uppercase tracking-[0.12em] hover:scale-110 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-            style={{
-              backgroundColor: "#FFD245",
-              color: "#050A14",
-              fontSize: 14,
-              padding: "16px 44px",
-              boxShadow:
-                "0 0 36px rgba(255,210,69,0.40), 0 0 0 1px rgba(255,210,69,0.34), inset 0 1px 0 rgba(255,255,255,0.18)",
-            }}
-            onMouseEnter={(e) =>
-              ((e.currentTarget as HTMLAnchorElement).style.backgroundColor = "#FFE57A")
-            }
-            onMouseLeave={(e) =>
-              ((e.currentTarget as HTMLAnchorElement).style.backgroundColor = "#FFD245")
-            }
-          >
-            Quero sair do caos
-          </a>
+          <WhatsAppCta label="Quero sair do caos" />
         </motion.div>
       </div>
     </section>
   );
 }
 
-// ─── Popup de conversão (Agendar / Comprar) ─────────────────────
-const WHATSAPP_NUMBER = "5551991387792";
-const WHATSAPP_BASE_MSG =
-  "Olá, gostaria de agendar uma apresentação do sistema IA do Vendas Mais!";
-// Link de destino do botão "Começar agora" (abre em nova aba).
-const BUY_LINK = "https://www.iavendasmais.com/";
-
-function LeadModal({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const [form, setForm] = useState({ nome: "", telefone: "", email: "" });
-
-  function update(field: keyof typeof form, value: string) {
-    setForm((prev) => ({ ...prev, [field]: value }));
-  }
-
-  function handleAgendar() {
-    // Simulação de gravação do lead (integrar com backend/CRM futuramente).
-    console.log("[lead] agendar", form);
-
-    const extras = [
-      form.nome && `Nome: ${form.nome}`,
-      form.telefone && `Telefone: ${form.telefone}`,
-      form.email && `E-mail: ${form.email}`,
-    ]
-      .filter(Boolean)
-      .join("\n");
-    const msg = extras ? `${WHATSAPP_BASE_MSG}\n\n${extras}` : WHATSAPP_BASE_MSG;
-    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
-    window.open(url, "_blank", "noopener,noreferrer");
-    onClose();
-  }
-
-  function handleComprar() {
-    // Simulação de gravação do lead (integrar com backend/CRM futuramente).
-    console.log("[lead] comprar", form);
-
-    window.open(BUY_LINK, "_blank", "noopener,noreferrer");
-    onClose();
-  }
-
-  const inputStyle: React.CSSProperties = {
-    width: "100%",
-    padding: "13px 16px",
-    borderRadius: 12,
-    background: "rgba(255,255,255,0.06)",
-    border: "1px solid rgba(255,255,255,0.14)",
-    color: "#ffffff",
-    fontSize: 15,
-    outline: "none",
-  };
-
-  return (
-    <AnimatePresence>
-      {open && (
-        <motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: "rgba(2,5,12,0.78)", backdropFilter: "blur(6px)" }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          onClick={onClose}
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="lead-modal-title"
-        >
-          <motion.div
-            className="relative w-full overflow-hidden rounded-3xl"
-            style={{
-              maxWidth: 460,
-              background:
-                "linear-gradient(135deg, rgba(8,28,52,0.98) 0%, rgba(5,10,20,0.99) 60%, rgba(32,22,8,0.96) 100%)",
-              border: "1px solid rgba(217,154,30,0.32)",
-              boxShadow: "0 40px 100px rgba(0,0,0,0.6)",
-              padding: "clamp(28px, 5vw, 40px)",
-            }}
-            initial={{ opacity: 0, y: 32, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 24, scale: 0.97 }}
-            transition={{ duration: 0.28 }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              type="button"
-              onClick={onClose}
-              aria-label="Fechar"
-              className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-white/10"
-              style={{ color: "rgba(255,255,255,0.6)" }}
-            >
-              <X size={20} />
-            </button>
-
-            <h3
-              id="lead-modal-title"
-              className="font-black"
-              style={{ color: "#ffffff", fontSize: "clamp(20px, 2.4vw, 26px)" }}
-            >
-              Vamos começar?
-            </h3>
-            <p
-              className="mt-2 font-medium"
-              style={{ color: "rgba(255,255,255,0.62)", fontSize: 14, lineHeight: 1.5 }}
-            >
-              Preencha seus dados e escolha como deseja seguir.
-            </p>
-
-            <div className="mt-6 flex flex-col gap-3">
-              <input
-                type="text"
-                placeholder="Nome"
-                value={form.nome}
-                onChange={(e) => update("nome", e.target.value)}
-                style={inputStyle}
-                aria-label="Nome"
-              />
-              <input
-                type="tel"
-                placeholder="Telefone"
-                value={form.telefone}
-                onChange={(e) => update("telefone", e.target.value)}
-                style={inputStyle}
-                aria-label="Telefone"
-              />
-              <input
-                type="email"
-                placeholder="E-mail"
-                value={form.email}
-                onChange={(e) => update("email", e.target.value)}
-                style={inputStyle}
-                aria-label="E-mail"
-              />
-            </div>
-
-            <div className="mt-6 flex flex-col gap-3">
-              <button
-                type="button"
-                onClick={handleAgendar}
-                className="inline-flex items-center justify-center gap-2 rounded-full font-black uppercase tracking-[0.1em] transition-all duration-300 hover:scale-[1.03]"
-                style={{
-                  backgroundColor: "#FFD245",
-                  color: "#050A14",
-                  fontSize: 13,
-                  padding: "15px 28px",
-                  boxShadow: "0 0 32px rgba(255,210,69,0.36), inset 0 1px 0 rgba(255,255,255,0.18)",
-                }}
-              >
-                <CalendarClock size={17} strokeWidth={2.2} />
-                Agendar horário
-              </button>
-              <button
-                type="button"
-                onClick={handleComprar}
-                className="inline-flex items-center justify-center gap-2 rounded-full font-black uppercase tracking-[0.1em] transition-all duration-300 hover:scale-[1.03]"
-                style={{
-                  background: "transparent",
-                  color: "#2D9CFF",
-                  fontSize: 13,
-                  padding: "15px 28px",
-                  border: "1px solid rgba(45,156,255,0.5)",
-                }}
-              >
-                <ShoppingCart size={17} strokeWidth={2.2} />
-                Começar agora
-              </button>
-            </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-}
-
 function FinalCTASection() {
-  const [leadModalOpen, setLeadModalOpen] = useState(false);
+  const { openAgendar, openPlans } = useLeadModal();
   return (
     <section
       id="contato"
@@ -563,8 +417,8 @@ function FinalCTASection() {
               <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
                 <button
                   type="button"
-                  onClick={() => setLeadModalOpen(true)}
-                  className="cta-interactive inline-flex items-center justify-center rounded-full font-black uppercase tracking-[0.14em] hover:scale-110 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                  onClick={openAgendar}
+                  className="cta-interactive inline-flex items-center justify-center rounded-full font-black uppercase tracking-[0.14em] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
                   style={{
                     backgroundColor: "#FFD245",
                     color: "#050A14",
@@ -584,8 +438,8 @@ function FinalCTASection() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setLeadModalOpen(true)}
-                  className="cta-interactive inline-flex items-center justify-center rounded-full font-black uppercase tracking-[0.14em] hover:scale-110 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                  onClick={openPlans}
+                  className="cta-interactive inline-flex items-center justify-center rounded-full font-black uppercase tracking-[0.14em] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
                   style={{
                     background: "transparent",
                     color: "#ffffff",
@@ -670,8 +524,6 @@ function FinalCTASection() {
           </p>
         </div>
       </div>
-
-      <LeadModal open={leadModalOpen} onClose={() => setLeadModalOpen(false)} />
     </section>
   );
 }
@@ -710,14 +562,16 @@ function DoubtVideoSection() {
           </p>
         </motion.div>
 
-        {/* Vídeo do Everaldo — placeholder até a gravação ser entregue */}
+        {/* Vídeo de apresentação (vertical 9:16) */}
         <motion.div
           {...inViewScale}
           transition={{ ...inViewScale.transition, delay: 0.1 }}
           className="relative mx-auto mt-12 flex items-center justify-center overflow-hidden rounded-3xl"
           style={{
-            aspectRatio: "16 / 9",
+            aspectRatio: "9 / 16",
             width: "100%",
+            maxWidth: 380,
+            maxHeight: "min(76vh, 680px)",
             background:
               "linear-gradient(135deg, rgba(8,28,52,0.92) 0%, rgba(5,10,20,0.96) 60%, rgba(32,22,8,0.9) 100%)",
             border: "1px solid rgba(217,154,30,0.32)",
@@ -725,16 +579,16 @@ function DoubtVideoSection() {
               "0 40px 100px rgba(0,0,0,0.48), inset 0 1px 0 rgba(255,255,255,0.08)",
           }}
         >
-          {/* TODO: substituir por <video>/embed quando o vídeo do Everaldo for entregue */}
-          <div className="flex flex-col items-center gap-4 text-center">
-            <PlayCircle size={72} strokeWidth={1.3} color="#FFD245" />
-            <p
-              className="text-sm font-bold uppercase tracking-[0.18em]"
-              style={{ color: "rgba(255,255,255,0.62)" }}
-            >
-              Vídeo em breve
-            </p>
-          </div>
+          <video
+            controls
+            playsInline
+            preload="metadata"
+            className="h-full w-full"
+            style={{ objectFit: "cover" }}
+          >
+            <source src={DOUBT_VIDEO_SRC} type="video/mp4" />
+            Seu navegador não suporta a reprodução de vídeo.
+          </video>
         </motion.div>
 
         <motion.div
@@ -742,26 +596,7 @@ function DoubtVideoSection() {
           {...inViewFadeUp}
           transition={{ ...inViewFadeUp.transition, delay: 0.18 }}
         >
-          <a
-            href="#contato"
-            className="cta-interactive inline-flex items-center justify-center rounded-full font-black uppercase tracking-[0.12em] hover:scale-110 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-            style={{
-              backgroundColor: "#FFD245",
-              color: "#050A14",
-              fontSize: 14,
-              padding: "16px 44px",
-              boxShadow:
-                "0 0 36px rgba(255,210,69,0.40), 0 0 0 1px rgba(255,210,69,0.34), inset 0 1px 0 rgba(255,255,255,0.18)",
-            }}
-            onMouseEnter={(e) =>
-              ((e.currentTarget as HTMLAnchorElement).style.backgroundColor = "#FFE57A")
-            }
-            onMouseLeave={(e) =>
-              ((e.currentTarget as HTMLAnchorElement).style.backgroundColor = "#FFD245")
-            }
-          >
-            Quero vender mais todos os meses
-          </a>
+          <WhatsAppCta label="Quero vender mais todos os meses" />
         </motion.div>
       </div>
     </section>

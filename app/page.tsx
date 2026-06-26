@@ -5,6 +5,7 @@ import { useScroll } from "framer-motion";
 import VMScrollCanvas from "@/components/VMScrollCanvas";
 import VMExperience from "@/components/VMExperience";
 import PostScrollSections from "@/components/PostScrollSections";
+import { LeadModalProvider } from "@/components/LeadModals";
 import { TOTAL_FRAMES, FRAMES_PATH } from "@/data/vmData";
 
 export default function Home() {
@@ -16,6 +17,7 @@ export default function Home() {
   });
 
   return (
+    <LeadModalProvider>
     <main className="font-sans" style={{ backgroundColor: "#050A14" }}>
       {/* ── Scroll-locked sequence: 600vh ── */}
       <section
@@ -39,5 +41,6 @@ export default function Home() {
         <PostScrollSections />
       </div>
     </main>
+    </LeadModalProvider>
   );
 }
