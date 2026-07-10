@@ -15,7 +15,12 @@ import {
 } from "react";
 import type React from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { plansData } from "@/data/vmData";
+import {
+  billingPeriods,
+  getPlanPricing,
+  plansData,
+  type BillingPeriod,
+} from "@/data/vmData";
 import {
   WHATSAPP_BASE_MSG,
   WHATSAPP_NUMBER,
@@ -238,14 +243,27 @@ function LeadModal({
   );
 }
 
-// ─── Popup de planos (apenas exibição) ──────────────────────────
+function periodNote(period: BillingPeriod, discountPercent: number): string | null {
+  if (period === "mensal") return null;
+  if (period === "semestral") {
+    return `${discountPercent}% de desconto no primeiro semestre. Após isso, valor normal com 10% recorrente.`;
+  }
+  if (period === "trimestral") {
+    return `${discountPercent}% de desconto no primeiro trimestre. Após isso, valor normal.`;
+  }
+  return `${discountPercent}% de desconto no primeiro ano. Após isso, valor normal.`;
+}
+
+// ─── Popup de planos (toggle + cards) ───────────────────────────
 function PlansModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const [period, setPeriod] = useState<BillingPeriod>("semestral");
+
   return (
     <AnimatePresence>
       {open && (
         <motion.div
-          className="fixed inset-0 z-[60] flex items-center justify-center overflow-y-auto p-4"
-          style={{ background: "rgba(2,5,12,0.80)", backdropFilter: "blur(6px)" }}
+          className="fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto p-4 sm:items-center"
+          style={{ background: "rgba(2,5,12,0.84)", backdropFilter: "blur(8px)" }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -255,8 +273,15 @@ function PlansModal({ open, onClose }: { open: boolean; onClose: () => void }) {
           aria-labelledby="plans-modal-title"
         >
           <motion.div
-            className="relative my-auto w-full overflow-hidden rounded-3xl"
-            style={{ maxWidth: 880, padding: "clamp(28px, 5vw, 44px)", ...modalCardStyle }}
+            className="relative my-6 w-full overflow-hidden rounded-3xl sm:my-8"
+            style={{
+              maxWidth: 1120,
+              padding: "clamp(24px, 4vw, 40px)",
+              background:
+                "linear-gradient(180deg, #070D18 0%, #050A14 55%, #0A0612 100%)",
+              border: "1px solid rgba(255,255,255,0.10)",
+              boxShadow: "0 40px 120px rgba(0,0,0,0.65)",
+            }}
             initial={{ opacity: 0, y: 32, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 24, scale: 0.97 }}
@@ -276,71 +301,201 @@ function PlansModal({ open, onClose }: { open: boolean; onClose: () => void }) {
             <h3
               id="plans-modal-title"
               className="text-center font-black"
-              style={{ color: "#ffffff", fontSize: "clamp(22px, 2.6vw, 30px)" }}
+              style={{ color: "#ffffff", fontSize: "clamp(22px, 2.8vw, 34px)" }}
             >
-              Nossos planos
+              {plansData.heading}
             </h3>
             <p
-              className="mx-auto mt-2 max-w-xl text-center font-medium"
-              style={{ color: "rgba(255,255,255,0.62)", fontSize: 14, lineHeight: 1.5 }}
+              className="mx-auto mt-2 max-w-2xl text-center font-medium"
+              style={{ color: "rgba(255,255,255,0.58)", fontSize: 14, lineHeight: 1.5 }}
             >
               {plansData.sub}
             </p>
 
-            <div className="mt-8 flex flex-col gap-4 md:flex-row md:gap-5">
-              {plansData.plans.map((plan) => (
-                <div
-                  key={plan.name}
-                  className="relative flex flex-1 flex-col rounded-2xl p-6"
-                  style={{
-                    backgroundColor: "rgba(255,255,255,0.05)",
-                    border: plan.highlight
-                      ? "1px solid rgba(217,154,30,0.64)"
-                      : "1px solid rgba(255,255,255,0.10)",
-                    boxShadow: plan.highlight
-                      ? "0 24px 70px rgba(217,154,30,0.10), inset 0 1px 0 rgba(255,255,255,0.10)"
-                      : "inset 0 1px 0 rgba(255,255,255,0.06)",
-                  }}
-                >
-                  {"badge" in plan && plan.badge && (
-                    <span
-                      className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full px-4 py-1 text-xs font-bold uppercase tracking-widest"
-                      style={{ backgroundColor: "#D99A1E", color: "#050A14" }}
+            {/* Toggle de período */}
+            <div className="mt-7 flex justify-center">
+              <div
+                className="inline-flex flex-wrap items-center justify-center gap-1 rounded-full p-1"
+                style={{
+                  border: "1px solid rgba(255,255,255,0.16)",
+                  background: "rgba(255,255,255,0.04)",
+                }}
+                role="tablist"
+                aria-label="Período de cobrança"
+              >
+                {billingPeriods.map((item) => {
+                  const active = period === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      role="tab"
+                      aria-selected={active}
+                      onClick={() => setPeriod(item.id)}
+                      className="rounded-full px-4 py-2 text-sm font-bold transition-all duration-200 sm:px-5"
+                      style={
+                        active
+                          ? { backgroundColor: "#ffffff", color: "#050A14" }
+                          : { color: "rgba(255,255,255,0.78)" }
+                      }
                     >
-                      {plan.badge}
-                    </span>
-                  )}
+                      {item.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
 
-                  <p className="mb-2 text-lg font-black tracking-widest text-white">
-                    {plan.name}
-                  </p>
-                  <p
-                    className="mb-6 text-sm font-medium"
-                    style={{ color: "rgba(255,255,255,0.50)" }}
+            {/* Cards */}
+            <div className="mt-8 grid grid-cols-1 gap-5 lg:grid-cols-3">
+              {plansData.plans.map((plan) => {
+                const pricing = getPlanPricing(plan.key, period);
+                const note = periodNote(period, pricing.discountPercent);
+
+                return (
+                  <div
+                    key={plan.key}
+                    className="relative flex flex-col rounded-2xl p-5 sm:p-6"
+                    style={{
+                      backgroundColor: "rgba(255,255,255,0.04)",
+                      border: plan.highlight
+                        ? "1.5px solid rgba(168,85,247,0.85)"
+                        : "1px solid rgba(255,255,255,0.10)",
+                      boxShadow: plan.highlight
+                        ? "0 0 40px rgba(168,85,247,0.18), inset 0 1px 0 rgba(255,255,255,0.08)"
+                        : `inset 1.5px 0 0 ${plan.accent}, inset 0 1px 0 rgba(255,255,255,0.05)`,
+                    }}
                   >
-                    {plan.price}
-                  </p>
-
-                  <ul className="flex flex-1 flex-col gap-3">
-                    {plan.features.map((feat) => (
-                      <li
-                        key={feat}
-                        className="flex items-start gap-2 text-sm font-medium"
-                        style={{ color: "rgba(255,255,255,0.70)" }}
+                    {"badge" in plan && plan.badge && (
+                      <span
+                        className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full px-3.5 py-1 text-[11px] font-bold"
+                        style={{
+                          backgroundColor: "#A855F7",
+                          color: "#ffffff",
+                          boxShadow: "0 8px 24px rgba(168,85,247,0.35)",
+                        }}
                       >
-                        <Check
-                          size={16}
-                          strokeWidth={2.4}
-                          color="#D99A1E"
-                          className="mt-0.5 flex-shrink-0"
-                          aria-hidden="true"
-                        />
-                        {feat}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
+                        {plan.badge}
+                      </span>
+                    )}
+
+                    {pricing.showStrike && (
+                      <span
+                        className="absolute right-4 top-4 rounded-full px-2.5 py-1 text-[10px] font-bold"
+                        style={{
+                          background: "rgba(168,85,247,0.22)",
+                          color: "#E9D5FF",
+                          border: "1px solid rgba(168,85,247,0.35)",
+                        }}
+                      >
+                        {pricing.discountPercent}% de desconto
+                      </span>
+                    )}
+
+                    <p className="pr-20 text-xl font-black text-white">{plan.name}</p>
+                    <p
+                      className="mt-1 text-sm font-medium"
+                      style={{ color: "rgba(255,255,255,0.52)" }}
+                    >
+                      {plan.tagline}
+                    </p>
+
+                    <div className="mt-5">
+                      {pricing.showStrike && (
+                        <p
+                          className="text-sm font-medium line-through"
+                          style={{ color: "rgba(255,255,255,0.38)" }}
+                        >
+                          {pricing.baseLabel} /mês
+                        </p>
+                      )}
+                      <p className="flex items-baseline gap-1.5">
+                        <span className="text-[28px] font-black leading-none text-white sm:text-[32px]">
+                          {pricing.monthlyLabel}
+                        </span>
+                        <span
+                          className="text-sm font-medium"
+                          style={{ color: "rgba(255,255,255,0.55)" }}
+                        >
+                          /mês
+                        </span>
+                      </p>
+                      {pricing.showTotal && (
+                        <p
+                          className="mt-1.5 text-[11px] font-bold uppercase tracking-wide"
+                          style={{ color: "rgba(255,255,255,0.42)" }}
+                        >
+                          Cobrança única {pricing.totalLabel}
+                        </p>
+                      )}
+                    </div>
+
+                    <a
+                      href="#contato"
+                      onClick={onClose}
+                      className="mt-5 inline-flex w-full items-center justify-center rounded-full py-3 text-center text-sm font-black transition-all duration-300 hover:scale-[1.02]"
+                      style={
+                        plan.highlight
+                          ? {
+                              background:
+                                "linear-gradient(135deg, #A855F7 0%, #7C3AED 100%)",
+                              color: "#ffffff",
+                              boxShadow: "0 0 28px rgba(168,85,247,0.35)",
+                            }
+                          : {
+                              border: "1px solid rgba(255,255,255,0.22)",
+                              color: "#ffffff",
+                              background: "rgba(255,255,255,0.03)",
+                            }
+                      }
+                    >
+                      {plan.cta}
+                    </a>
+
+                    {note && (
+                      <p
+                        className="mt-3 text-center text-[11px] font-medium leading-snug"
+                        style={{ color: "rgba(255,255,255,0.42)" }}
+                      >
+                        {note}
+                      </p>
+                    )}
+
+                    <ul className="plans-features-scroll mt-5 flex max-h-[280px] flex-1 flex-col gap-2.5 overflow-y-auto pr-1">
+                      {plan.features.map((feat) => (
+                        <li
+                          key={feat.text}
+                          className="flex items-start gap-2 text-[12.5px] font-medium leading-snug"
+                          style={{
+                            color: feat.included
+                              ? "rgba(255,255,255,0.78)"
+                              : "rgba(255,255,255,0.38)",
+                          }}
+                        >
+                          {feat.included ? (
+                            <Check
+                              size={15}
+                              strokeWidth={2.6}
+                              color="#22C55E"
+                              className="mt-0.5 flex-shrink-0"
+                              aria-hidden
+                            />
+                          ) : (
+                            <X
+                              size={15}
+                              strokeWidth={2.6}
+                              color="#EF4444"
+                              className="mt-0.5 flex-shrink-0"
+                              aria-hidden
+                            />
+                          )}
+                          {feat.text}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                );
+              })}
             </div>
           </motion.div>
         </motion.div>

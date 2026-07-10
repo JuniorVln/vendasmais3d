@@ -111,43 +111,159 @@ export const socialProofData = {
   sub: "Empresas que usam o Vendas Mais fecham mais rápido.",
 };
 
+export type BillingPeriod = "mensal" | "trimestral" | "semestral" | "anual";
+
+export const billingPeriods: Array<{ id: BillingPeriod; label: string }> = [
+  { id: "mensal", label: "Mensal" },
+  { id: "trimestral", label: "Trimestral" },
+  { id: "semestral", label: "Semestral" },
+  { id: "anual", label: "Anual" },
+];
+
+/** Preços base mensais (sem desconto). */
+const PLAN_BASE_PRICES = {
+  basico: 97,
+  essencial: 297,
+  profissional: 497,
+} as const;
+
+/** Desconto aplicado sobre o valor mensal por período. */
+const PERIOD_DISCOUNT: Record<BillingPeriod, number> = {
+  mensal: 0,
+  trimestral: 0.2,
+  semestral: 0.3,
+  anual: 0.4,
+};
+
+const PERIOD_MONTHS: Record<BillingPeriod, number> = {
+  mensal: 1,
+  trimestral: 3,
+  semestral: 6,
+  anual: 12,
+};
+
+function formatBRL(value: number): string {
+  return value.toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
+export function getPlanPricing(
+  planKey: keyof typeof PLAN_BASE_PRICES,
+  period: BillingPeriod,
+) {
+  const base = PLAN_BASE_PRICES[planKey];
+  const discount = PERIOD_DISCOUNT[period];
+  const monthly = Math.round(base * (1 - discount) * 100) / 100;
+  const months = PERIOD_MONTHS[period];
+  const total = Math.round(monthly * months * 100) / 100;
+
+  return {
+    baseMonthly: base,
+    monthly,
+    total,
+    discountPercent: Math.round(discount * 100),
+    baseLabel: formatBRL(base),
+    monthlyLabel: formatBRL(monthly),
+    totalLabel: formatBRL(total),
+    showStrike: discount > 0,
+    showTotal: period === "semestral" || period === "anual",
+  };
+}
+
+export type PlanFeature = { text: string; included: boolean };
+
 export const plansData = {
-  heading: "Planos para cada momento comercial",
-  sub: "Compare os caminhos e fale com um especialista para montar a melhor configuração.",
+  heading: "Planos pensados para vender mais",
+  sub: "Pagamento recorrente no cartão. Você escolhe o que faz sentido agora.",
+  guarantees: [
+    "Teste grátis por 15 dias",
+    "Cancele quando quiser",
+    "Sem burocracia",
+  ],
+  bottomCta: "Comece hoje e leve seu negócio para o próximo nível",
   plans: [
     {
-      name: "STARTER",
-      price: "Para começar com processo",
-      features: ["Acesso à plataforma", "CRM integrado", "Rotina básica de follow-up"],
-      cta: "Consultar plano",
+      key: "basico" as const,
+      name: "Básico",
+      tagline: "Organize suas vendas",
+      cta: "Começar grátis",
       highlight: false,
+      accent: "#22C55E",
+      features: [
+        { text: "Quantidade de acessos: 1 usuário", included: true },
+        { text: "IA inteligente (treinada para seu negócio) — 300 interações", included: true },
+        { text: "Disparos de até 1000 e-mails por mês", included: true },
+        { text: "Pesquisas (web, Instagram, LinkedIn) — 50 por mês", included: true },
+        { text: "Dashboard, Estoque, IA, CRM, Campanhas, Financeiro", included: true },
+        { text: "Prompts prontos", included: true },
+        { text: "CRM Básico (120 leads)", included: true },
+        { text: "Funil de vendas", included: true },
+        { text: "Gestão de leads por Kanban", included: true },
+        { text: "Registro de negociações", included: true },
+        { text: "Lembretes de follow-up", included: true },
+        { text: "IA para Dica do dia", included: true },
+        { text: "Acesso via app e web", included: true },
+        { text: "Agenda integrada — Google", included: false },
+        { text: "Relatórios avançados", included: false },
+        { text: "Integração com WhatsApp", included: false },
+        { text: "Pesquisas avançadas", included: false },
+        { text: "IA para lembretes inteligentes", included: false },
+      ] satisfies PlanFeature[],
     },
     {
-      name: "PRO",
-      price: "Para acelerar vendas com IA",
-      features: [
-        "Tudo do Starter",
-        "IA comercial avançada",
-        "Workflows de acompanhamento",
-        "VM+ Academy",
-        "Suporte prioritário",
-      ],
-      cta: "Conhecer o Pro",
+      key: "essencial" as const,
+      name: "Essencial",
+      tagline: "Venda mais com inteligência",
+      cta: "Testar grátis agora",
       highlight: true,
-      badge: "MAIS INDICADO",
+      badge: "Mais escolhido",
+      accent: "#A855F7",
+      features: [
+        { text: "Quantidade de acessos: 3 usuários", included: true },
+        { text: "IA inteligente (treinada para seu negócio) — 900 interações", included: true },
+        { text: "Disparos de até 3000 e-mails por mês", included: true },
+        { text: "Pesquisas (web, Instagram, LinkedIn) — 80 por mês", included: true },
+        { text: "Campanhas, CRM, Dashboard, Estoque, Financeiro, Google Agenda", included: true },
+        { text: "Tudo do Básico", included: true },
+        { text: "Gestão de equipe (Dashboard/Vendas/Interações)", included: true },
+        { text: "CRM avançado ilimitado", included: true },
+        { text: "Segmentação de clientes por grupos", included: true },
+        { text: "Sugestões de ações de vendas", included: true },
+        { text: "Pesquisa avançada nas redes sociais", included: true },
+        { text: "Pesquisa avançada em sites — Benchmarking", included: true },
+        { text: "Relatórios de desempenho", included: true },
+        { text: "Ranking de vendedores", included: true },
+        { text: "Automação de follow-ups", included: false },
+        { text: "Disparos de mensagens via WhatsApp", included: false },
+        { text: "Interação com a IA por comando de voz", included: false },
+        { text: "Envio de áudio para a IA", included: false },
+      ] satisfies PlanFeature[],
     },
     {
-      name: "ENTERPRISE",
-      price: "Para operações com múltiplas equipes",
-      features: [
-        "Tudo do Pro",
-        "Multi-equipe",
-        "Onboarding dedicado",
-        "Integrações customizadas",
-        "SLA garantido",
-      ],
-      cta: "Falar com especialista",
+      key: "profissional" as const,
+      name: "Profissional",
+      tagline: "Escalone suas vendas com IA",
+      cta: "Quero vender mais",
       highlight: false,
+      accent: "#EF4444",
+      features: [
+        { text: "Quantidade de acessos: 5 usuários", included: true },
+        { text: "IA inteligente (treinada para seu negócio) — 1200 interações", included: true },
+        { text: "Disparos de até 5000 e-mails por mês", included: true },
+        { text: "Pesquisas (web, Instagram, LinkedIn) — 250 por mês", included: true },
+        { text: "Campanhas, CRM, Dashboard, Estoque, Financeiro, Google Agenda", included: true },
+        { text: "Tudo do Essencial", included: true },
+        { text: "IA avançada (Mkt)", included: true },
+        { text: "Automação de follow-ups", included: true },
+        { text: "Disparos de mensagens via WhatsApp", included: true },
+        { text: "Interação com a IA por comando de voz", included: true },
+        { text: "Buscador de empresas", included: true },
+        { text: "Relatórios avançados", included: true },
+      ] satisfies PlanFeature[],
     },
   ],
 };
