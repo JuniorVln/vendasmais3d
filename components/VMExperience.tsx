@@ -1140,6 +1140,19 @@ function MobileVMExperience({ scrollYProgress }: VMExperienceProps) {
 
   return (
     <div className="absolute inset-0 z-10 flex items-end px-5 pb-8 pt-8" aria-live="polite">
+      {/* Entrar — fixo no topo, igual ao desktop (sempre visível em todas as fases) */}
+      <div
+        className="pointer-events-none absolute left-0 right-0 top-0 z-20 flex justify-end px-5"
+        style={{ paddingTop: "max(12px, env(safe-area-inset-top))" }}
+      >
+        <VmCtaLink
+          label="Entrar"
+          href={APP_AUTH_URL}
+          variant="cyan"
+          className="pointer-events-auto"
+        />
+      </div>
+
       <AnimatePresence mode="wait">
         <motion.div
           key={activePhase}
