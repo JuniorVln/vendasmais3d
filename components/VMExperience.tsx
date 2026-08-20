@@ -116,13 +116,14 @@ function VmCtaLink({
   xl?: boolean;
   /** Efeito pulsante contínuo (pág. 1). */
   pulse?: boolean;
-  /** Esquema de cor: dourado (padrão), ciano (ENTRAR) ou verde (WhatsApp). */
-  variant?: "gold" | "cyan" | "whatsapp";
+  /** Esquema de cor: dourado (padrão), ciano (ENTRAR), verde (WhatsApp) ou contorno (secundário). */
+  variant?: "gold" | "cyan" | "whatsapp" | "outline";
   /** Quando definido, vira <button> (abre popup) em vez de link. */
   onClick?: () => void;
 }) {
   const isCyan = variant === "cyan";
   const isWhats = variant === "whatsapp";
+  const isOutline = variant === "outline";
 
   const baseStyle: React.CSSProperties = isCyan
     ? {
@@ -137,6 +138,14 @@ function VmCtaLink({
         backgroundColor: vmGreen,
         color: "#ffffff",
         boxShadow: "0 0 32px rgba(37,211,102,0.42), 0 0 0 1px rgba(37,211,102,0.40)",
+      }
+    : isOutline
+    ? {
+        ...vmCtaButtonStyle,
+        backgroundColor: "transparent",
+        color: "#ffffff",
+        boxShadow: "none",
+        border: "1px solid rgba(255,255,255,0.28)",
       }
     : vmCtaButtonStyle;
 
@@ -157,6 +166,14 @@ function VmCtaLink({
   const hoverColor = isCyan ? vmCyanLight : isWhats ? vmGreenDark : vmGoldLight;
   const restColor = isCyan ? vmCyan : isWhats ? vmGreen : vmGold;
 
+  const applyHover = (el: HTMLElement, hovering: boolean) => {
+    if (isOutline) {
+      el.style.borderColor = hovering ? "rgba(45,156,255,0.6)" : "rgba(255,255,255,0.28)";
+      return;
+    }
+    el.style.backgroundColor = hovering ? hoverColor : restColor;
+  };
+
   const classes = `cta-interactive ${isWhats ? "cta-whatsapp" : ""} pointer-events-auto inline-flex items-center justify-center gap-2 rounded-full font-semibold tracking-wide focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${pulse ? "cta-pulse" : ""} ${className}`;
   const content = (
     <>
@@ -172,8 +189,8 @@ function VmCtaLink({
         onClick={onClick}
         className={classes}
         style={style}
-        onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.backgroundColor = hoverColor)}
-        onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.backgroundColor = restColor)}
+        onMouseEnter={(e) => applyHover(e.currentTarget as HTMLButtonElement, true)}
+        onMouseLeave={(e) => applyHover(e.currentTarget as HTMLButtonElement, false)}
         aria-label={label}
       >
         {content}
@@ -188,8 +205,8 @@ function VmCtaLink({
       rel={isWhats ? "noopener noreferrer" : undefined}
       className={classes}
       style={style}
-      onMouseEnter={(e) => ((e.currentTarget as HTMLAnchorElement).style.backgroundColor = hoverColor)}
-      onMouseLeave={(e) => ((e.currentTarget as HTMLAnchorElement).style.backgroundColor = restColor)}
+      onMouseEnter={(e) => applyHover(e.currentTarget as HTMLAnchorElement, true)}
+      onMouseLeave={(e) => applyHover(e.currentTarget as HTMLAnchorElement, false)}
       aria-label={label}
     >
       {content}
@@ -989,7 +1006,7 @@ const phase5Features: Array<
 // Cena 05: phone centered, features left + right
 function PhaseCTA() {
   const e = easeOutExpo;
-  const { openAgendar } = useLeadModal();
+  const { openAgendar, openPlans } = useLeadModal();
 
   return (
     <motion.div
@@ -1060,13 +1077,14 @@ function PhaseCTA() {
       ))}
 
       <motion.div
-        className="absolute left-0 right-0 flex justify-center"
+        className="absolute left-0 right-0 flex flex-wrap items-center justify-center gap-3"
         style={{ bottom: "4.8%" }}
         initial={{ opacity: 0, y: 32, scale: 0.9 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.65, delay: 0.46, ease: e }}
       >
         <VmCtaLink label="Agendar demonstração" className="cta-phone-glow" big onClick={openAgendar} />
+        <VmCtaLink label="Ver planos" variant="outline" big onClick={openPlans} />
       </motion.div>
     </motion.div>
   );
@@ -1134,7 +1152,7 @@ const mobilePhaseCopy: Record<Phase, {
 function MobileVMExperience({ scrollYProgress }: VMExperienceProps) {
   const activePhase = useActivePhase(scrollYProgress);
   const copy = mobilePhaseCopy[activePhase];
-  const { openAgendar } = useLeadModal();
+  const { openAgendar, openPlans } = useLeadModal();
   // Phase 2 é o único CTA de WhatsApp no mobile; demais abrem o popup de captação.
   const ctaIsWhats = activePhase === 2;
 
@@ -1212,7 +1230,7 @@ function MobileVMExperience({ scrollYProgress }: VMExperienceProps) {
             ))}
           </div>
           {copy.cta && (
-            <div className="mt-6 flex justify-center">
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
               {ctaIsWhats ? (
                 <VmCtaLink
                   label={copy.cta}
@@ -1222,6 +1240,14 @@ function MobileVMExperience({ scrollYProgress }: VMExperienceProps) {
                 />
               ) : (
                 <VmCtaLink label={copy.cta} className="max-w-full" onClick={openAgendar} />
+              )}
+              {activePhase === 5 && (
+                <VmCtaLink
+                  label="Ver planos"
+                  className="max-w-full"
+                  variant="outline"
+                  onClick={openPlans}
+                />
               )}
             </div>
           )}
