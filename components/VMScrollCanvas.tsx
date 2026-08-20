@@ -7,6 +7,9 @@ interface VMScrollCanvasProps {
   scrollYProgress: MotionValue<number>;
   totalFrames: number;
   framesPath: string;
+  /** Sequência leve (WebP 750w) usada no mobile — ~8 MB em vez de ~47 MB. */
+  mobileFramesPath?: string;
+  mobileFrameExt?: string;
 }
 
 // Fase de autoridade: segura o mesmo frame enquanto os cards animam.
@@ -26,6 +29,8 @@ export default function VMScrollCanvas({
   scrollYProgress,
   totalFrames,
   framesPath,
+  mobileFramesPath,
+  mobileFrameExt = "webp",
 }: VMScrollCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imagesRef = useRef<HTMLImageElement[]>([]);
@@ -35,10 +40,19 @@ export default function VMScrollCanvas({
   const rafRef = useRef<number>(0);
   const [isReady, setIsReady] = useState(false);
   const [loadProgress, setLoadProgress] = useState(0);
+  // Decidido já no primeiro render do cliente (null no SSR), para o pré-load
+  // começar direto no conjunto certo e nunca baixar os dois.
+  const [isMobile] = useState<boolean | null>(() =>
+    typeof window === "undefined" ? null : window.innerWidth < 768,
+  );
+
+  const useMobileFrames = isMobile === true && !!mobileFramesPath;
+  const activePath = useMobileFrames ? (mobileFramesPath as string) : framesPath;
+  const activeExt = useMobileFrames ? mobileFrameExt : "jpg";
 
   const frameSrc = useCallback(
-    (i: number) => `${framesPath}/${String(i).padStart(4, "0")}.jpg`,
-    [framesPath],
+    (i: number) => `${activePath}/${String(i).padStart(4, "0")}.${activeExt}`,
+    [activePath, activeExt],
   );
 
   // ── Desenha um frame específico no canvas (cover-fit + DPR) ──
@@ -73,6 +87,7 @@ export default function VMScrollCanvas({
 
   // ── Pré-carrega todos os frames ──
   useEffect(() => {
+    if (isMobile === null) return;
     let cancelled = false;
     let loaded = 0;
     const imgs: HTMLImageElement[] = new Array(totalFrames);
@@ -99,7 +114,7 @@ export default function VMScrollCanvas({
     return () => {
       cancelled = true;
     };
-  }, [totalFrames, frameSrc, drawFrame]);
+  }, [totalFrames, frameSrc, drawFrame, isMobile]);
 
   // ── Loop de animação: interpola o frame atual em direção ao alvo (lerp) ──
   useEffect(() => {
@@ -194,11 +209,18 @@ export default function VMScrollCanvas({
         )}
       </AnimatePresence>
 
-      <canvas
-        ref={canvasRef}
-        aria-hidden="true"
-        className="absolute inset-0 w-full h-full"
-      />
+      {/*
+        Mobile: palco 16:9 no topo — o frame aparece INTEIRO (antes, o cover em
+        tela cheia descartava ~75% da largura). Desktop: segue tela cheia.
+      */}
+      <div className="absolute inset-x-0 top-[9vh] h-[42vh] md:inset-0 md:h-full">
+        <canvas ref={canvasRef} aria-hidden="true" className="h-full w-full" />
+        {/* Esfuma a borda de baixo do palco no fundo da página (só mobile) */}
+        <div
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-16 md:hidden"
+          style={{ background: "linear-gradient(180deg, rgba(5,10,20,0) 0%, #050A14 100%)" }}
+        />
+      </div>
     </div>
   );
 }

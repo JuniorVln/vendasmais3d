@@ -6,7 +6,7 @@ import VMScrollCanvas from "@/components/VMScrollCanvas";
 import VMExperience from "@/components/VMExperience";
 import PostScrollSections from "@/components/PostScrollSections";
 import { LeadModalProvider } from "@/components/LeadModals";
-import { TOTAL_FRAMES, FRAMES_PATH } from "@/data/vmData";
+import { TOTAL_FRAMES, FRAMES_PATH, MOBILE_FRAMES_PATH } from "@/data/vmData";
 
 export default function Home() {
   const containerRef = useRef<HTMLElement>(null);
@@ -31,6 +31,7 @@ export default function Home() {
             scrollYProgress={scrollYProgress}
             totalFrames={TOTAL_FRAMES}
             framesPath={FRAMES_PATH}
+            mobileFramesPath={MOBILE_FRAMES_PATH}
           />
           <VMExperience scrollYProgress={scrollYProgress} />
         </div>

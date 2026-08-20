@@ -1159,7 +1159,12 @@ function MobileVMExperience({ scrollYProgress }: VMExperienceProps) {
   const ctaIsWhats = activePhase === 2;
 
   return (
-    <div className="absolute inset-0 z-10 flex items-end px-5 pb-8 pt-8" aria-live="polite">
+    <div
+      className="absolute inset-0 z-10 flex items-end px-5 pb-8"
+      // Começa abaixo do palco 16:9 do canvas (11vh de topo + 9/16 da largura).
+      style={{ paddingTop: "calc(51vh + 12px)" }}
+      aria-live="polite"
+    >
       {/* Entrar — fixo no topo, igual ao desktop (sempre visível em todas as fases) */}
       <div
         className="pointer-events-none absolute left-0 right-0 top-0 z-20 flex justify-end px-5"

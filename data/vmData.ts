@@ -2,6 +2,8 @@
 // Frames extraídos de "video final.mp4" (3840x2160 → escala 1920w), 30fps, 604 frames (0000–0603).
 export const TOTAL_FRAMES = 604;
 export const FRAMES_PATH = "/frames";
+/** Sequência leve (WebP 750w, ~8 MB) servida no mobile. */
+export const MOBILE_FRAMES_PATH = "/frames-mobile";
 // Use the checked-in video by default. Run npm run encode-scroll if a keyframe-per-frame file is needed later.
 export const VIDEO_SCROLL_PATH = "/videos/vm-scroll.mp4";
 // Original video — fallback when vm-scroll.mp4 hasn't been encoded yet
