@@ -144,8 +144,8 @@ function VmCtaLink({
         ...vmCtaButtonStyle,
         backgroundColor: "transparent",
         color: "#ffffff",
-        boxShadow: "none",
-        border: "1px solid rgba(255,255,255,0.28)",
+        // contorno via inset shadow (não border) para a caixa medir igual ao CTA dourado
+        boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.28)",
       }
     : vmCtaButtonStyle;
 
@@ -168,7 +168,9 @@ function VmCtaLink({
 
   const applyHover = (el: HTMLElement, hovering: boolean) => {
     if (isOutline) {
-      el.style.borderColor = hovering ? "rgba(45,156,255,0.6)" : "rgba(255,255,255,0.28)";
+      el.style.boxShadow = hovering
+        ? "inset 0 0 0 1px rgba(45,156,255,0.6)"
+        : "inset 0 0 0 1px rgba(255,255,255,0.28)";
       return;
     }
     el.style.backgroundColor = hovering ? hoverColor : restColor;
@@ -1077,7 +1079,7 @@ function PhaseCTA() {
       ))}
 
       <motion.div
-        className="absolute left-0 right-0 flex flex-wrap items-center justify-center gap-3"
+        className="absolute left-0 right-0 flex flex-wrap items-center justify-center gap-3 [&>*]:min-w-[300px]"
         style={{ bottom: "4.8%" }}
         initial={{ opacity: 0, y: 32, scale: 0.9 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -1230,7 +1232,11 @@ function MobileVMExperience({ scrollYProgress }: VMExperienceProps) {
             ))}
           </div>
           {copy.cta && (
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+            <div
+              className={`mt-6 flex flex-wrap items-center justify-center gap-3 ${
+                activePhase === 5 ? "[&>*]:min-w-[230px]" : ""
+              }`}
+            >
               {ctaIsWhats ? (
                 <VmCtaLink
                   label={copy.cta}
