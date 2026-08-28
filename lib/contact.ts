@@ -1,7 +1,7 @@
 // Dados de contato compartilhados (WhatsApp / e-mail / links de app).
 // Centralizado para todos os CTAs usarem a mesma fonte.
 
-export const WHATSAPP_NUMBER = "5551991387792";
+export const WHATSAPP_NUMBER = "5551993979013";
 
 export const WHATSAPP_BASE_MSG =
   "Olá, gostaria de agendar uma apresentação do sistema IA do Vendas Mais!";
