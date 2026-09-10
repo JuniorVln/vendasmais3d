@@ -503,7 +503,10 @@ function FinalCTASection() {
                       {sub}
                     </p>
                     {linkLabel && (
-                      <p className="mt-0.5 text-sm font-bold" style={{ color: "#0074BD" }}>
+                      <p
+                        className="mt-0.5 whitespace-nowrap font-bold"
+                        style={{ color: "#0074BD", fontSize: "clamp(11px, 2.9vw, 14px)" }}
+                      >
                         {linkLabel}
                       </p>
                     )}
