@@ -172,7 +172,7 @@ export function getPlanPricing(
     monthlyLabel: formatBRL(monthly),
     totalLabel: formatBRL(total),
     showStrike: discount > 0,
-    showTotal: period === "semestral" || period === "anual",
+    showTotal: period !== "mensal",
   };
 }
 
@@ -248,7 +248,7 @@ export const plansData = {
     {
       key: "profissional" as const,
       name: "Profissional",
-      tagline: "Escalone suas vendas com IA",
+      tagline: "Escale suas vendas com IA",
       cta: "Quero vender mais",
       highlight: false,
       accent: "#EF4444",

@@ -366,7 +366,7 @@ function FinalCTASection() {
             border: "1px solid rgba(217,154,30,0.32)",
             boxShadow:
               "0 40px 100px rgba(0,0,0,0.48), inset 0 1px 0 rgba(255,255,255,0.10), 0 0 0 1px rgba(217,154,30,0.05)",
-            padding: "clamp(40px, 6vw, 72px)",
+            padding: "clamp(24px, 6vw, 72px)",
           }}
         >
           {/* Inner top gold line */}
@@ -380,9 +380,9 @@ function FinalCTASection() {
             }}
           />
 
-          <div className="grid gap-12 lg:grid-cols-[1fr_0.68fr] lg:items-center">
+          <div className="grid min-w-0 gap-12 lg:grid-cols-[1fr_0.68fr] lg:items-center">
             {/* Left: logo + headline + CTA */}
-            <div>
+            <div className="min-w-0">
               <div style={{ marginBottom: 40 }}>
                 <Image
                   src="/logo-vendas-mais-oficial-colorido.png"
@@ -418,12 +418,12 @@ function FinalCTASection() {
                 <button
                   type="button"
                   onClick={openAgendar}
-                  className="cta-interactive inline-flex items-center justify-center rounded-full font-black uppercase tracking-[0.14em] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                  className="cta-interactive inline-flex w-full items-center justify-center rounded-full text-center font-black uppercase tracking-[0.14em] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 sm:w-auto"
                   style={{
                     backgroundColor: "#FFD245",
                     color: "#050A14",
                     fontSize: 13,
-                    padding: "17px 44px",
+                    padding: "17px clamp(18px, 5vw, 44px)",
                     boxShadow:
                       "0 0 40px rgba(255,210,69,0.40), 0 0 0 1px rgba(255,210,69,0.34), inset 0 1px 0 rgba(255,255,255,0.18)",
                   }}
@@ -439,12 +439,12 @@ function FinalCTASection() {
                 <button
                   type="button"
                   onClick={openPlans}
-                  className="cta-interactive inline-flex items-center justify-center rounded-full font-black uppercase tracking-[0.14em] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                  className="cta-interactive inline-flex w-full items-center justify-center rounded-full text-center font-black uppercase tracking-[0.14em] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 sm:w-auto"
                   style={{
                     background: "transparent",
                     color: "#ffffff",
                     fontSize: 13,
-                    padding: "17px 44px",
+                    padding: "17px clamp(18px, 5vw, 44px)",
                     border: "1px solid rgba(255,255,255,0.28)",
                   }}
                   onMouseEnter={(e) =>
@@ -460,16 +460,16 @@ function FinalCTASection() {
             </div>
 
             {/* Right: contacts */}
-            <div className="flex flex-col gap-4">
+            <div className="flex min-w-0 flex-col gap-4">
               {contactCards.map(({ Icon, prefix, highlight, sub, href, linkLabel }) => (
                 <a
                   key={highlight}
                   href={href}
                   target={highlight === "WHATSAPP" ? "_blank" : undefined}
                   rel={highlight === "WHATSAPP" ? "noopener noreferrer" : undefined}
-                  className="flex items-center gap-5 rounded-2xl transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                  className="flex min-w-0 items-center gap-5 rounded-2xl transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
                   style={{
-                    padding: "24px 22px",
+                    padding: "24px clamp(16px, 4vw, 22px)",
                     background: "rgba(255,255,255,0.05)",
                     border: "1px solid rgba(255,255,255,0.10)",
                     backdropFilter: "blur(18px)",
@@ -494,7 +494,7 @@ function FinalCTASection() {
                   >
                     <Icon size={28} strokeWidth={1.8} color="#0074BD" />
                   </span>
-                  <div>
+                  <div className="min-w-0 break-words">
                     <p className="text-sm font-black uppercase leading-tight tracking-wide" style={{ color: "#ffffff" }}>
                       {prefix}{" "}
                       <span style={{ color: "#0074BD" }}>{highlight}</span>
