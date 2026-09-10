@@ -467,7 +467,7 @@ function FinalCTASection() {
                   href={href}
                   target={highlight === "WHATSAPP" ? "_blank" : undefined}
                   rel={highlight === "WHATSAPP" ? "noopener noreferrer" : undefined}
-                  className="flex min-w-0 items-center gap-5 rounded-2xl transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                  className="flex min-w-0 items-center gap-3.5 rounded-2xl transition-all duration-200 sm:gap-5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
                   style={{
                     padding: "24px clamp(16px, 4vw, 22px)",
                     background: "rgba(255,255,255,0.05)",
@@ -495,17 +495,23 @@ function FinalCTASection() {
                     <Icon size={28} strokeWidth={1.8} color="#0074BD" />
                   </span>
                   <div className="min-w-0 break-words">
-                    <p className="text-sm font-black uppercase leading-tight tracking-wide" style={{ color: "#ffffff" }}>
+                    <p
+                      className="font-black uppercase leading-tight tracking-wide"
+                      style={{ color: "#ffffff", fontSize: "clamp(12px, 3.3vw, 13.5px)" }}
+                    >
                       {prefix}{" "}
                       <span style={{ color: "#0074BD" }}>{highlight}</span>
                     </p>
-                    <p className="mt-1 text-sm font-medium leading-snug" style={{ color: "rgba(255,255,255,0.50)" }}>
+                    <p
+                      className="mt-1 font-medium leading-snug"
+                      style={{ color: "rgba(255,255,255,0.50)", fontSize: "clamp(11px, 3.0vw, 13.5px)" }}
+                    >
                       {sub}
                     </p>
                     {linkLabel && (
                       <p
                         className="mt-0.5 whitespace-nowrap font-bold"
-                        style={{ color: "#0074BD", fontSize: "clamp(11px, 2.9vw, 14px)" }}
+                        style={{ color: "#0074BD", fontSize: "clamp(11px, 2.85vw, 13.5px)" }}
                       >
                         {linkLabel}
                       </p>
